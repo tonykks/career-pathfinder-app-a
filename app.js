@@ -203,40 +203,54 @@ document.addEventListener('DOMContentLoaded', () => {
   function calculateTopJobs() {
     const startTime = performance.now();
 
-    // Initialize Domain Scores & Primary Star Sums
-    const domainScores = {};
-    const primaryStarSums = {}; // For tie-breaking (ONLY 1.0 weight primary subjects)
+    // Initialize Domain Weighted Score Sums & Total Weights Sums
+    const domainWeightedSums = {};
+    const domainTotalWeights = {};
+    const primaryStarSums = {}; // For tie-breaking (ratings sum of weights >= 1.0)
+
     Object.keys(DOMAINS).forEach(dId => {
-      domainScores[dId] = 0;
+      domainWeightedSums[dId] = 0;
+      domainTotalWeights[dId] = 0;
       primaryStarSums[dId] = 0;
     });
 
-    // 1. Calculate 6 Domain Scores (Standard Subjects)
+    // 1. Calculate Standard Subjects Normalized Average Ratings for 6 Domains
     SUBJECT_MAPPING.forEach(subject => {
       const rating = state.standardRatings[subject.id] || 3;
-      if (subject.primaryDomain) {
-        domainScores[subject.primaryDomain] += rating * subject.primaryWeight;
-        if (subject.primaryWeight === 1.0) {
-          primaryStarSums[subject.primaryDomain] += rating;
-        }
-      }
-      if (subject.secondaryDomain) {
-        domainScores[subject.secondaryDomain] += rating * subject.secondaryWeight;
+      if (subject.domainWeights) {
+        Object.entries(subject.domainWeights).forEach(([dId, w]) => {
+          if (dId in domainWeightedSums) {
+            domainWeightedSums[dId] += rating * w;
+            domainTotalWeights[dId] += w;
+            if (w >= 1.0) {
+              primaryStarSums[dId] += rating;
+            }
+          }
+        });
       }
     });
 
     // 2. Calculate Custom Subjects Scores into Domain Scores
     state.customSubjects.forEach(custom => {
-      if (custom.domainId in domainScores) {
-        domainScores[custom.domainId] += custom.rating * 1.0;
+      if (custom.domainId in domainWeightedSums) {
+        domainWeightedSums[custom.domainId] += custom.rating * 1.0;
+        domainTotalWeights[custom.domainId] += 1.0;
         primaryStarSums[custom.domainId] += custom.rating;
       }
     });
 
-    // 3. Sort Domains by Score (Tie-breaker: 1st Total Domain Score, 2nd 1.0 Primary Star Sum, 3rd Fixed Order)
+    // 3. Compute Normalized Average Rating Score (1.0 ~ 5.0) per Domain
+    const domainScores = {};
+    Object.keys(DOMAINS).forEach(dId => {
+      domainScores[dId] = domainTotalWeights[dId] > 0
+        ? (domainWeightedSums[dId] / domainTotalWeights[dId])
+        : 0;
+    });
+
+    // 4. Sort Domains by Score (Tie-breaker: 1st Total Domain Score, 2nd 1.0 Primary Star Sum, 3rd Fixed Order)
     const fixedOrder = ['it', 'medical', 'engineering', 'humanities', 'business', 'arts_sports'];
     const sortedDomains = Object.keys(DOMAINS).sort((a, b) => {
-      if (domainScores[b] !== domainScores[a]) {
+      if (Math.abs(domainScores[b] - domainScores[a]) > 0.0001) {
         return domainScores[b] - domainScores[a];
       }
       if (primaryStarSums[b] !== primaryStarSums[a]) {
@@ -248,7 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const top1DomainId = sortedDomains[0];
     const top2DomainId = sortedDomains[1];
 
-    // 4. Select Best Fitting Job within Top 1 Domain using subjectAffinity Rule
+    // 5. Select Best Fitting Job within Top 1 Domain using subjectAffinity Rule
     const top1Candidates = JOBS_DATASET.filter(j => j.domainId === top1DomainId);
     top1Candidates.sort((a, b) => {
       const scoreA = calculateJobScoreInDomain(a, state.standardRatings, state.customSubjects);
@@ -261,7 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     const top1Job = top1Candidates[0] || JOBS_DATASET[0];
 
-    // 5. Select Best Fitting Job within Top 2 Domain using subjectAffinity Rule
+    // 6. Select Best Fitting Job within Top 2 Domain using subjectAffinity Rule
     const top2Candidates = JOBS_DATASET.filter(j => j.domainId === top2DomainId);
     top2Candidates.sort((a, b) => {
       const scoreA = calculateJobScoreInDomain(a, state.standardRatings, state.customSubjects);
@@ -332,7 +346,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Fallback 2: Domain-level related subjects if still fewer than 3
     if (high.length < 3) {
       SUBJECT_MAPPING.forEach(s => {
-        if (!high.includes(s.name) && (s.primaryDomain === job.domainId || s.secondaryDomain === job.domainId)) {
+        const isRelated = s.domainWeights && (job.domainId in s.domainWeights);
+        if (!high.includes(s.name) && isRelated) {
           if (high.length < 3) high.push(s.name);
         }
       });

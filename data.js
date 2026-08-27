@@ -4,18 +4,18 @@
  * (Rule-based 직업별 세부 적합도 가중치 subjectAffinity 포함 - [App A 구현 가정])
  */
 
-// 1. 기본 10개 교과목 및 계열 가중치 매핑 데이터
+// 1. 기본 10개 교과목 및 계열 가중치 매핑 데이터 [App A 구현 가정]
 const SUBJECT_MAPPING = [
-  { id: 'korean', name: '국어', category: '표준 교과', primaryDomain: 'humanities', primaryWeight: 1.0, secondaryDomain: 'business', secondaryWeight: 0.5 },
-  { id: 'math', name: '수학', category: '표준 교과', primaryDomain: 'engineering', primaryWeight: 1.0, secondaryDomain: 'it', secondaryWeight: 0.5 },
-  { id: 'english', name: '영어', category: '표준 교과', primaryDomain: 'humanities', primaryWeight: 1.0, secondaryDomain: 'business', secondaryWeight: 0.5 },
-  { id: 'history', name: '한국사', category: '표준 교과', primaryDomain: 'humanities', primaryWeight: 1.0, secondaryDomain: null, secondaryWeight: 0 },
-  { id: 'social', name: '사회탐구 (일반사회/지리/윤리/역사)', category: '표준 교과', primaryDomain: 'humanities', primaryWeight: 1.0, secondaryDomain: 'business', secondaryWeight: 0.5 },
-  { id: 'science', name: '과학탐구 (물리/화학/생명과학/지구과학)', category: '표준 교과', primaryDomain: 'engineering', primaryWeight: 1.0, secondaryDomain: 'medical', secondaryWeight: 0.5 },
-  { id: 'info', name: '정보 / 코딩', category: '표준 교과', primaryDomain: 'it', primaryWeight: 1.0, secondaryDomain: null, secondaryWeight: 0 },
-  { id: 'tech', name: '기술 · 가정', category: '표준 교과', primaryDomain: 'engineering', primaryWeight: 0.5, secondaryDomain: 'it', secondaryWeight: 0.5 },
-  { id: 'arts_sports', name: '미술 / 음악 / 체육', category: '표준 교과', primaryDomain: 'arts_sports', primaryWeight: 1.0, secondaryDomain: null, secondaryWeight: 0 },
-  { id: 'foreign', name: '제2외국어', category: '표준 교과', primaryDomain: 'humanities', primaryWeight: 0.5, secondaryDomain: null, secondaryWeight: 0 }
+  { id: 'korean', name: '국어', category: '표준 교과', domainWeights: { humanities: 1.0, medical: 0.5, business: 0.5, arts_sports: 0.5 } },
+  { id: 'math', name: '수학', category: '표준 교과', domainWeights: { engineering: 1.0, it: 1.0, business: 1.0, medical: 0.8 } },
+  { id: 'english', name: '영어', category: '표준 교과', domainWeights: { humanities: 0.5, business: 0.8, medical: 0.8 } },
+  { id: 'history', name: '한국사', category: '표준 교과', domainWeights: { humanities: 1.0 } },
+  { id: 'social', name: '사회탐구 (일반사회/지리/윤리/역사)', category: '표준 교과', domainWeights: { humanities: 1.0, business: 1.0 } },
+  { id: 'science', name: '과학탐구 (물리/화학/생명과학/지구과학)', category: '표준 교과', domainWeights: { engineering: 1.0, medical: 1.0, it: 0.5 } },
+  { id: 'info', name: '정보 / 코딩', category: '표준 교과', domainWeights: { it: 1.0, arts_sports: 0.5, engineering: 0.5 } },
+  { id: 'tech', name: '기술 · 가정', category: '표준 교과', domainWeights: { engineering: 1.0, it: 0.5 } },
+  { id: 'arts_sports', name: '미술 / 음악 / 체육', category: '표준 교과', domainWeights: { arts_sports: 1.0 } },
+  { id: 'foreign', name: '제2외국어', category: '표준 교과', domainWeights: { humanities: 1.0, business: 0.5 } }
 ];
 
 // 2. 6개 진로 분야(Domain) 정의
@@ -38,12 +38,11 @@ const JOBS_DATASET = [
     domainName: '인문사회',
     isRepresentativeRef: false,
     subjectAffinity: { social: 2.0, korean: 1.5, history: 1.5, english: 1.0 }, // [App A 구현 가정]
-    reasonTemplate: (highSubjects) => `${highSubjects.join(', ')} 과목에 높은 선호를 보인 점은 법률 조문 분석, 논리적 서면 작성 및 인간·사회 현상에 관한 깊은 관심과 연계됩니다.`,
-    tasks: '민·형사 소송 대리, 법률 자문, 계약서 검토 및 법적 분쟁 조정을 수행합니다.',
-    majors: ['법학과', '행정학과', '자율전공학부'],
-    recommendedSubjects: ['화법과 언어', '독서와 작문', '정치와 법', '사회와 문화', '윤리와 사상'],
-    officialSource: { name: '커리어넷 변호사 직업정보', url: 'https://www.career.go.kr/cloud/m/job/view?seq=375' },
-    onetInfo: { code: '23-1011.00', title: 'Lawyers', riasec: 'ECI' }
+    officialSource: { name: '커리어넷 직업정보 (변호사)', url: 'https://www.career.go.kr/cnet/front/base/job/jobView.do?seq=374' },
+    tasks: '사건 의뢰인의 법률 자문, 민형사 소송 대리 및 법정 변론 수행',
+    majors: ['법학과', '공공인재학부', '자율전공학부'],
+    recommendedSubjects: ['사회탐구 (일반사회/윤리)', '국어', '한국사'],
+    reasonTemplate: (subjects) => `${subjects.join(', ')} 과목의 높은 관심도를 바탕으로 논리적 사고와 법률 해석 능력이 요구되는 변호사 직업에 높은 적합성을 보입니다.`
   },
   {
     id: 'reporter',
@@ -52,12 +51,11 @@ const JOBS_DATASET = [
     domainName: '인문사회',
     isRepresentativeRef: false,
     subjectAffinity: { korean: 2.0, foreign: 2.0, social: 1.2, english: 1.2 }, // [App A 구현 가정]
-    reasonTemplate: (highSubjects) => `${highSubjects.join(', ')} 과목에 높은 점수를 준 점은 취재 내용을 바탕으로 사건을 객관적으로 분석하고 명확한 기사로 전달하는 활동과 잘 부합합니다.`,
-    tasks: '사건·사고 취재, 기사 기획 및 작성, 인터뷰 진행, 뉴미디어 콘텐츠 제작을 담당합니다.',
-    majors: ['미디어커뮤니케이션학과', '신문방송학과', '국어국문학과', '정치외교학과'],
-    recommendedSubjects: ['화법과 언어', '독서와 작문', '사회와 문화', '현대사회와 윤리', '세계사'],
-    officialSource: { name: '커리어넷 기자 직업정보', url: 'https://www.career.go.kr/cloud/m/job/view?seq=262' },
-    onetInfo: { code: '27-3023.00', title: 'News Analysts, Reporters, and Journalists', riasec: 'AIE' }
+    officialSource: { name: '고용24 직업정보 (기자)', url: 'https://www.work24.go.kr/wk/r/c/1000/jobPsyExamList.do' },
+    tasks: '사회 현상 취재, 기사 작성, 보도 및 다양한 미디어 콘텐츠 기획',
+    majors: ['미디어커뮤니케이션학과', '신문방송학과', '국어국문학과'],
+    recommendedSubjects: ['국어', '제2외국어', '사회탐구'],
+    reasonTemplate: (subjects) => `${subjects.join(', ')} 선호도가 우수하여 취재력, 기사 작성 능력 및 사회 현상 분석이 핵심인 기자 직업에 유의미하게 부합합니다.`
   },
 
   // --- 자연과학 / 공학 계열 (Engineering) ---
@@ -66,28 +64,26 @@ const JOBS_DATASET = [
     name: '기계공학기술자',
     domainId: 'engineering',
     domainName: '자연과학 / 공학',
-    isRepresentativeRef: true,
+    isRepresentativeRef: true, // [App A 구현 가정] 대표 참고 직업
     subjectAffinity: { math: 2.0, tech: 2.0, science: 1.5 }, // [App A 구현 가정]
-    reasonTemplate: (highSubjects) => `${highSubjects.join(', ')} 과목에 대한 뛰어난 흥미는 역학 원리를 계산하고 역학 구조물을 설계·시행해 신기계를 개발하는 공학 역량과 높은 연관성을 가집니다.`,
-    tasks: '기계 장치 및 생산 설비 설계, 재료·성능 검토, 시제품 시험 및 도면 작성, 고장 원인 진단을 수행합니다.',
-    majors: ['기계공학과', '기계설계공학과', '생산기계공학과', '제어계측공학과'],
-    recommendedSubjects: ['미적분', '기하', '물리학', '화학', '기술·가정', '정보'],
-    officialSource: { name: '주니어 커리어넷 기계공학기술자', url: 'https://www.career.go.kr/cloud/jm/job/view?seq=10589' },
-    onetInfo: { code: '17-2141.00', title: 'Mechanical Engineers', riasec: 'RIC' }
+    officialSource: { name: '커리어넷 직업정보 (기계공학기술자)', url: 'https://www.career.go.kr/cnet/front/base/job/jobView.do?seq=152' },
+    tasks: '산업용 기계, 로봇, 자동화 설비의 설계·제작·유지보수 및 연구 개발',
+    majors: ['기계공학과', '메카트로닉스공학과', '로봇공학과'],
+    recommendedSubjects: ['수학 (미적분/기하)', '과학탐구 (물리학)', '기술·가정'],
+    reasonTemplate: (subjects) => `${subjects.join(', ')} 과목에 대한 뛰어난 역량이 확인되어 기계 메커니즘 설계와 공학적 문제 해결을 수행하는 기계공학기술자에 적합합니다.`
   },
   {
     id: 'architect',
-    name: '건축가 (건축사)',
+    name: '건축가',
     domainId: 'engineering',
     domainName: '자연과학 / 공학',
     isRepresentativeRef: false,
     subjectAffinity: { arts_sports: 2.0, math: 1.8, tech: 1.5, science: 1.0 }, // [App A 구현 가정]
-    reasonTemplate: (highSubjects) => `${highSubjects.join(', ')} 과목 선호는 구조적 수리 계산과 공간 조형 감각을 종합하여 효율적이고 아름다운 건축물을 계획하는 작업에 적합한 기질을 나타냅니다.`,
-    tasks: '건축물 설계 계획 수립, 건축 도면 작성, 시공 현장 감리 및 공간 디자인 자문을 수행합니다.',
+    officialSource: { name: 'O*NET SOC (Architects)', url: 'https://www.onetcenter.org/link/summary/17-1011.00' },
+    tasks: '건축물 설계, 공간 구조 기획, 시공 도면 작성 및 현장 조율',
     majors: ['건축학과 (5년제)', '건축공학과', '실내건축학과'],
-    recommendedSubjects: ['미적분', '기하', '물리학', '미술', '지구과학'],
-    officialSource: { name: '커리어넷 건축가 직업정보', url: 'https://www.career.go.kr/cnet/app/base/job/jobView.m?SEQ=1277' },
-    onetInfo: { code: '17-1011.00', title: 'Architects, Except Landscape and Naval', riasec: 'RCA' }
+    recommendedSubjects: ['수학', '미술/음악/체육 (미술)', '기술·가정'],
+    reasonTemplate: (subjects) => `${subjects.join(', ')} 성향이 잘 조화되어 공간 조형 감각과 공학적 안전 설계를 융합하는 건축가 진로가 크게 추천됩니다.`
   },
   {
     id: 'env_engineer',
@@ -96,102 +92,95 @@ const JOBS_DATASET = [
     domainName: '자연과학 / 공학',
     isRepresentativeRef: false,
     subjectAffinity: { science: 2.0, tech: 1.8, math: 1.0 }, // [App A 구현 가정]
-    reasonTemplate: (highSubjects) => `${highSubjects.join(', ')} 과목에 관심이 높다면 대기·수질·폐기물 오염 문제를 과학적 설비와 데이터로 해결하는 친환경 공학 분야에 높은 잠재력을 가지고 있습니다.`,
-    tasks: '환경 오염 측정 및 분석, 오염 방지 설비 설계·시공, 탄소중립 기술 연구를 담당합니다.',
-    majors: ['환경공학과', '환경에너지공학과', '화학공학과', '지구환경과학과'],
-    recommendedSubjects: ['화학', '생명과학', '지구과학', '미적분', '환경'],
-    officialSource: { name: '커리어넷 환경공학기술자 직업정보', url: 'https://www.career.go.kr/cloud/m/job/view?seq=1080' },
-    onetInfo: { code: '17-2081.00', title: 'Environmental Engineers', riasec: 'IRC' }
+    officialSource: { name: '커리어넷 직업정보 (환경공학기술자)', url: 'https://www.career.go.kr/cnet/front/base/job/jobView.do?seq=284' },
+    tasks: '수질·대기·폐기물 오염 방지 기술 개발, 환경 영향 평가 및 에코 설비 연구',
+    majors: ['환경공학과', '지구환경과학과', '화학공학과'],
+    recommendedSubjects: ['과학탐구 (화학/생명과학)', '기술·가정', '수학'],
+    reasonTemplate: (subjects) => `${subjects.join(', ')} 선호도가 높아 환경 오염 측정 및 친환경 공학 기술을 연구하는 환경공학기술자에 높은 맞춤도를 보입니다.`
   },
 
   // --- IT / 소프트웨어 계열 (IT) ---
   {
     id: 'sw_developer',
-    name: '소프트웨어개발자',
+    name: '시스템소프트웨어개발자',
     domainId: 'it',
     domainName: 'IT / 소프트웨어',
-    isRepresentativeRef: true,
+    isRepresentativeRef: true, // [App A 구현 가정] 대표 참고 직업
     subjectAffinity: { info: 2.0, english: 1.8, math: 1.0 }, // [App A 구현 가정]
-    reasonTemplate: (highSubjects) => `${highSubjects.join(', ')} 과목의 높은 선호도는 논리적 문제 해결 능력과 컴퓨팅 사고력을 바탕으로 알고리즘 및 프로그램을 설계·구현하는 적성과 일치합니다.`,
-    tasks: '운영체제 및 응용 소프트웨어 기획·설계, 프로그래밍 코드 작성, 시스템 테스트 및 유지보수를 담당합니다.',
-    majors: ['컴퓨터공학과', '소프트웨어공학과', '정보통신공학과', 'AI융합학과'],
-    recommendedSubjects: ['정보 / 코딩', '확률과 통계', '미적분', '영어', '물리학'],
-    officialSource: { name: '커리어넷 시스템소프트웨어개발자', url: 'https://www.career.go.kr/cloud/m/job/view?seq=834' },
-    onetInfo: { code: '15-1252.00', title: 'Software Developers', riasec: 'ICR' }
+    officialSource: { name: '고용24 직업정보 (소프트웨어개발자)', url: 'https://www.work24.go.kr/wk/r/c/1000/jobPsyExamList.do' },
+    tasks: '운영체제, 웹/앱 애플리케이션 프로그래밍, 코딩 및 시스템 아키텍처 설계',
+    majors: ['컴퓨터공학과', '소프트웨어학과', '정보통신공학과'],
+    recommendedSubjects: ['정보/코딩', '수학 (수학II/인공지능수학)', '영어'],
+    reasonTemplate: (subjects) => `${subjects.join(', ')} 분야의 강점이 두드러져 소프트웨어 설계 및 인공지능/프로그래밍을 담당하는 개발자 직업에 가장 부합합니다.`
   },
   {
     id: 'data_scientist',
     name: '데이터과학자',
     domainId: 'it',
     domainName: 'IT / 소프트웨어',
-    isRepresentativeRef: true,
+    isRepresentativeRef: true, // [App A 구현 가정] 대표 참고 직업
     subjectAffinity: { math: 2.0, info: 1.8, science: 1.5 }, // [App A 구현 가정]
-    reasonTemplate: (highSubjects) => `${highSubjects.join(', ')} 과목에 호기심이 많은 점은 대용량 비구조화 데이터를 수집·통계 모델링하여 인사이트를 도출하는 가치 창출에 직결됩니다.`,
-    tasks: '빅데이터 수집 및 정제, 머신러닝 알고리즘 모델링, 데이터 시각화 및 예측 분석을 수행합니다.',
-    majors: ['데이터사이언스학과', '통계학과', '컴퓨터공학과', '산업공학과'],
-    recommendedSubjects: ['확률과 통계', '정보 / 코딩', '미적분', '인공지능 수학', '영어'],
-    officialSource: { name: '커리어넷 데이터마이너 직업정보', url: 'https://www.career.go.kr/cloud/m/job/view?seq=10051' },
-    onetInfo: { code: '15-2051.00', title: 'Data Scientists', riasec: 'ICA' }
+    officialSource: { name: 'O*NET SOC (Data Scientists)', url: 'https://www.onetcenter.org/link/summary/15-2051.00' },
+    tasks: '빅데이터 수집, 통계 모델링, 머신러닝 알고리즘 개발 및 데이터 기반 인사이트 도출',
+    majors: ['데이터사이언스학과', '통계학과', 'AI응용학과'],
+    recommendedSubjects: ['수학 (확률과통계)', '정보/코딩', '과학탐구'],
+    reasonTemplate: (subjects) => `${subjects.join(', ')} 과목의 우수한 점수를 바탕으로 수리적 통계 분석과 빅데이터 모델링을 수행하는 데이터과학자 진로가 적극 추천됩니다.`
   },
   {
     id: 'security_analyst',
-    name: '정보보안분석가',
+    name: '정보보안전문가',
     domainId: 'it',
     domainName: 'IT / 소프트웨어',
     isRepresentativeRef: false,
     subjectAffinity: { english: 2.0, info: 1.5, social: 1.5 }, // [App A 구현 가정]
-    reasonTemplate: (highSubjects) => `${highSubjects.join(', ')} 과목에 선호도가 높은 점은 사이버 위협을 모니터링하고 시스템 침해를 예방하는 정교한 컴퓨팅 보안 활동과 신뢰성 있게 연결됩니다.`,
-    tasks: '네트워크 보안 체계 수립, 사이버 침해 사고 대응, 모의 침투 테스트 및 암호 기술 적용을 담당합니다.',
-    majors: ['정보보호학과', '사이버보안학과', '컴퓨터공학과'],
-    recommendedSubjects: ['정보 / 코딩', '확률과 통계', '영어', '정치와 법'],
-    officialSource: { name: '커리어넷 정보보호전문가 직업정보', url: 'https://www.career.go.kr/cloud/m/job/view?seq=435' },
-    onetInfo: { code: '15-1212.00', title: 'Information Security Analysts', riasec: 'CIR' }
+    officialSource: { name: '커리어넷 직업정보 (정보보안전문가)', url: 'https://www.career.go.kr/cnet/front/base/job/jobView.do?seq=412' },
+    tasks: '사이버 침해 사고 대응, 암호 알고리즘 분석, 네트워크 해킹 방어 및 보안 솔루션 구축',
+    majors: ['정보보안학과', '사이버보안학과', '컴퓨터공학과'],
+    recommendedSubjects: ['정보/코딩', '영어', '사회탐구'],
+    reasonTemplate: (subjects) => `${subjects.join(', ')} 과목 관심도가 높아 시스템 암호학 및 네트워크 방어 체계를 연구하는 정보보안전문가에 매우 적합합니다.`
   },
 
   // --- 예체능 계열 (Arts & Sports) ---
   {
     id: 'graphic_designer',
-    name: '그래픽디자이너',
+    name: '시각디자이너',
     domainId: 'arts_sports',
     domainName: '예체능',
     isRepresentativeRef: false,
     subjectAffinity: { arts_sports: 2.0, info: 2.0, social: 1.0 }, // [App A 구현 가정]
-    reasonTemplate: (highSubjects) => `${highSubjects.join(', ')} 과목을 선호하는 경향은 시각적 이미지를 미학적으로 구성하고 미디어 창작물로 표현하는 예술적 창의성과 이어집니다.`,
-    tasks: '광고·시각 매체 시각화, 웹 UI/UX 디자인, 브랜드 캐릭터 및 그래픽 요소 제작을 수행합니다.',
-    majors: ['시각디자인학과', '커뮤니케이션디자인학과', '디지털콘텐츠학과'],
-    recommendedSubjects: ['미술', '디자인 일반', '정보', '사회와 문화'],
-    officialSource: { name: '커리어넷 그래픽디자이너 직업정보', url: 'https://www.career.go.kr/cloud/m/job/view?seq=458' },
-    onetInfo: { code: '27-1024.00', title: 'Graphic Designers', riasec: 'ACE' }
+    officialSource: { name: '커리어넷 직업정보 (시각디자이너)', url: 'https://www.career.go.kr/cnet/front/base/job/jobView.do?seq=215' },
+    tasks: '포스터, 브랜드 로고, UI/UX 디지탈 그래픽 그래픽 제작 및 디자인 컨셉 기획',
+    majors: ['시각디자인학과', '커뮤니케이션디자인학과', '미디어디자인학과'],
+    recommendedSubjects: ['미술/음악/체육', '정보/코딩', '사회탐구'],
+    reasonTemplate: (subjects) => `${subjects.join(', ')} 분야의 표현력과 그래픽 활용 능력이 돋보여 비주얼 감각을 시각 매체로 구현하는 디자이너 진로와 일치합니다.`
   },
   {
     id: 'sports_coach',
-    name: '스포츠 코치 / 강사',
+    name: '스포츠지도사',
     domainId: 'arts_sports',
     domainName: '예체능',
     isRepresentativeRef: false,
     subjectAffinity: { arts_sports: 2.0, science: 2.0, korean: 1.0 }, // [App A 구현 가정]
-    reasonTemplate: (highSubjects) => `${highSubjects.join(', ')} 과목에 선호가 높은 학생은 신체 운동 기능을 지도하고 체력 및 건강을 증진하는 역동적인 스포츠 지도 활동에 강점을 보여줍니다.`,
-    tasks: '종목별 운동 기술 지도, 체력 훈련 프로그램 기획, 선수 육성 및 안전 관리를 담당합니다.',
-    majors: ['체육학과', '스포츠지도학과', '체육교육과', '스포츠의학과'],
-    recommendedSubjects: ['체육', '운동과 건강', '생명과학', '심리학'],
-    officialSource: { name: '커리어넷 스포츠강사 직업정보', url: 'https://www.career.go.kr/cloud/m/job/view?seq=421' },
-    onetInfo: { code: '27-2022.00', title: 'Coaches and Scouts', riasec: 'SER' }
+    officialSource: { name: '고용24 직업정보 (스포츠지도사)', url: 'https://www.work24.go.kr/wk/r/c/1000/jobPsyExamList.do' },
+    tasks: '운동선수 및 일반인의 신체 훈련 지도, 스포츠 기술 코칭, 체력 트레이닝',
+    majors: ['체육학과', '스포츠과학과', '사회체육학과'],
+    recommendedSubjects: ['미술/음악/체육 (체육)', '과학탐구 (생명과학)', '국어'],
+    reasonTemplate: (subjects) => `${subjects.join(', ')} 과목 선호도가 반영되어 운동 생리학과 실전 코칭 기술을 결합하는 스포츠지도사에 뛰어난 적합도를 보여줍니다.`
   },
 
-  // --- 의약 / 바이오 계열 (Medical & Bio) ---
+  // --- 의약 / 바이오 계열 (Medical) ---
   {
     id: 'physician',
-    name: '의사 (가정의학과)',
+    name: '가정의학과 전문의',
     domainId: 'medical',
     domainName: '의약 / 바이오',
-    isRepresentativeRef: true,
+    isRepresentativeRef: true, // [App A 구현 가정] 대표 참고 직업
     subjectAffinity: { science: 2.0, korean: 2.0, math: 1.0 }, // [App A 구현 가정]
-    reasonTemplate: (highSubjects) => `${highSubjects.join(', ')} 과목을 깊이 있게 좋아하는 점은 생명 현상 탐구와 인간 건강증진에 대한 소명의식을 기반으로 환자를 진료하는 의학적 진로에 적합합니다.`,
-    tasks: '환자 질병 진찰 및 검사 결과 분석, 치료 방침 결정, 종합적인 예방 의학 치료 지도를 수행합니다.',
-    majors: ['의예과 / 의학과 (6년제)', '치의예과'],
-    recommendedSubjects: ['생명과학', '화학', '미적분', '윤리와 사상', '영어'],
-    officialSource: { name: '커리어넷 전문의사 직업정보', url: 'https://www.career.go.kr/cloud/m/job/view?seq=25' },
-    onetInfo: { code: '29-1215.00', title: 'Family Medicine Physicians', riasec: 'SIC' }
+    officialSource: { name: 'O*NET SOC (Physicians, Family)', url: 'https://www.onetcenter.org/link/summary/29-1215.00' },
+    tasks: '환자 질병 진단, 처방, 종합 의료 상담 및 예방 의학적 건강 관리',
+    majors: ['의예과 (의학과)', '치의학과', '한의예과'],
+    recommendedSubjects: ['과학탐구 (생명과학/화학)', '수학', '국어'],
+    reasonTemplate: (subjects) => `${subjects.join(', ')} 분야의 강점이 검증되어 인체 생리학 및 종합 임상 의학을 진료하는 의사/전문의 직업에 높은 부합도를 나타냅니다.`
   },
   {
     id: 'nurse',
@@ -200,42 +189,39 @@ const JOBS_DATASET = [
     domainName: '의약 / 바이오',
     isRepresentativeRef: false,
     subjectAffinity: { korean: 2.0, english: 2.0, science: 1.5 }, // [App A 구현 가정]
-    reasonTemplate: (highSubjects) => `${highSubjects.join(', ')} 과목 선호는 의학적 전문 지식과 공감 및 치료 간호 능력을 바탕으로 환자 쾌유를 돕는 간호 전문직에 훌륭히 부합합니다.`,
-    tasks: '의무 진료 보조, 환자 상태 관찰 및 간호 기록, 투약 지도, 건강 상담 및 환자 간호를 담당합니다.',
-    majors: ['간호학과 (4년제)'],
-    recommendedSubjects: ['생명과학', '화학', '심리학', '화법과 언어', '영어'],
-    officialSource: { name: '커리어넷 간호사 직업정보', url: 'https://www.career.go.kr/cloud/m/job/view?seq=354' },
-    onetInfo: { code: '29-1141.00', title: 'Registered Nurses', riasec: 'SCI' }
+    officialSource: { name: '커리어넷 직업정보 (간호사)', url: 'https://www.career.go.kr/cnet/front/base/job/jobView.do?seq=112' },
+    tasks: '입원 및 외래 환자 간호, 의사 진료 보조, 투약 처리 및 환자 상태 모니터링',
+    majors: ['간호학과'],
+    recommendedSubjects: ['과학탐구 (생명과학)', '영어', '국어'],
+    reasonTemplate: (subjects) => `${subjects.join(', ')} 과목에 높은 흥미를 보여 환자 케어와 전문 의학적 간호 서비스를 제공하는 간호사 직업에 유의미하게 연관됩니다.`
   },
   {
     id: 'biomedical_researcher',
-    name: '생명의학연구원',
+    name: '유전공학연구원',
     domainId: 'medical',
     domainName: '의약 / 바이오',
-    isRepresentativeRef: true,
+    isRepresentativeRef: true, // [App A 구현 가정] 대표 참고 직업
     subjectAffinity: { science: 2.0, math: 2.0, info: 1.5 }, // [App A 구현 가정]
-    reasonTemplate: (highSubjects) => `${highSubjects.join(', ')} 과목에 높은 탐구열을 가진 학생은 질병 원인 규명 및 바이오 신약 개발을 탐구하는 생명과학 연구에 뛰어난 잠재력을 지닙니다.`,
-    tasks: '유전자 및 세포 실험 연구, 신약 물질 개발, 질병 바이오마커 분석 및 연구 논문 작성을 담당합니다.',
-    majors: ['생명공학과', '유전공학과', '생명과학과', '의생명공학과'],
-    recommendedSubjects: ['생명과학', '화학', '미적분', '확률과 통계', '영어'],
-    officialSource: { name: '커리어넷 유전공학연구원 직업정보', url: 'https://www.career.go.kr/cloud/m/job/view?seq=24' },
-    onetInfo: { code: '19-1042.00', title: 'Medical Scientists, Except Epidemiologists', riasec: 'IRC' }
+    officialSource: { name: '커리어넷 직업정보 (유전공학연구원)', url: 'https://www.career.go.kr/cnet/front/base/job/jobView.do?seq=325' },
+    tasks: 'DNA/RNA 유전자 분석, 신약 후보 물질 탐색, 세포 공학 연구 및 바이오 기술 개발',
+    majors: ['생명공학과', '유전공학과', '바이오시스템공학과'],
+    recommendedSubjects: ['과학탐구 (생명과학/화학)', '수학', '정보/코딩'],
+    reasonTemplate: (subjects) => `${subjects.join(', ')} 과목 점수가 우수하여 첨단 바이오 신약 및 유전자 분자 세포를 연구하는 유전공학연구원 진로가 강하게 추천됩니다.`
   },
 
   // --- 경영 / 경제 계열 (Business) ---
   {
     id: 'accountant',
-    name: '회계사',
+    name: '공인회계사',
     domainId: 'business',
     domainName: '경영 / 경제',
     isRepresentativeRef: false,
     subjectAffinity: { math: 2.0, social: 2.0, english: 1.0 }, // [App A 구현 가정]
-    reasonTemplate: (highSubjects) => `${highSubjects.join(', ')} 과목을 선호하는 성향은 재무 수치를 수집·분석하고 정교하게 감정하여 수치적 정밀성을 기하는 회계 전문 직무에 이상적입니다.`,
-    tasks: '기업 재무제표 감사, 세무 신고 대리, 세무 자문 및 회계 감사 보고서 작성을 수행합니다.',
-    majors: ['회계학과', '경영학과', '경제학과', '세무학과'],
-    recommendedSubjects: ['수학 (대수·확통)', '경제', '경제 수학', '사회와 문화', '영어'],
-    officialSource: { name: '커리어넷 회계사 직업정보', url: 'https://www.career.go.kr/cnet/app/base/job/jobView.m?SEQ=206' },
-    onetInfo: { code: '13-2011.00', title: 'Accountants and Auditors', riasec: 'CEI' }
+    officialSource: { name: '커리어넷 직업정보 (공인회계사)', url: 'https://www.career.go.kr/cnet/front/base/job/jobView.do?seq=098' },
+    tasks: '기업 재무제표 감사, 세무 대리, 회계 자문 및 기업 가치 평가',
+    majors: ['경영학과', '회계학과', '세무학과'],
+    recommendedSubjects: ['수학 (확률과통계)', '사회탐구 (경제)', '영어'],
+    reasonTemplate: (subjects) => `${subjects.join(', ')} 성향이 탁월하여 수리적 정확성과 수치 데이터 재무 감사를 전담하는 회계사에 높은 적합성을 나타냅니다.`
   },
   {
     id: 'consultant',
@@ -244,11 +230,10 @@ const JOBS_DATASET = [
     domainName: '경영 / 경제',
     isRepresentativeRef: false,
     subjectAffinity: { social: 2.0, english: 2.0, korean: 1.5 }, // [App A 구현 가정]
-    reasonTemplate: (highSubjects) => `${highSubjects.join(', ')} 과목의 흥미는 기업의 문제를 데이터와 사회 현상으로 분석하여 전략적 솔루션을 도출하는 경영 컨설팅 활동에 뛰어난 연결성을 가집니다.`,
-    tasks: '기업 경영 진단, 전략·조직·재무 솔루션 제안, 시장 분석 프로젝트 수행 및 자문을 담당합니다.',
-    majors: ['경영학과', '경제학과', '산업공학과', '국제통상학과'],
-    recommendedSubjects: ['경제', '사회와 문화', '확률과 통계', '경제 수학', '영어'],
-    officialSource: { name: '커리어넷 경영컨설턴트 직업정보', url: 'https://www.career.go.kr/cloud/m/job/view?seq=202' },
-    onetInfo: { code: '13-1111.00', title: 'Management Analysts', riasec: 'CIE' }
+    officialSource: { name: '고용24 직업정보 (경영컨설턴트)', url: 'https://www.work24.go.kr/wk/r/c/1000/jobPsyExamList.do' },
+    tasks: '기업 경영 전략 수립, 조직 문제 진단, 마케팅 전략 수립 및 경영 효율화 자문',
+    majors: ['경영학과', '경제학과', '산업공학과'],
+    recommendedSubjects: ['사회탐구 (경제/일반사회)', '영어', '국어'],
+    reasonTemplate: (subjects) => `${subjects.join(', ')} 선호도가 높아 기업 환경을 분석하고 전략적 해결책을 제안하는 경영컨설턴트 진로가 매우 적합합니다.`
   }
 ];
