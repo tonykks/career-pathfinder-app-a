@@ -1,0 +1,28 @@
+# OS & Editor Files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Dependency & Log Files
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+
+# Internal Agent Protocol & Specification Records (Excluded from public repository)
+agent-collab-kit/
+PROJECT_INTENT.md
+BRIEF.md
+STATE.md
+DECISIONS.md
+VERIFICATION.md
+requirements.md
+research_hank_raw.md
+research_any_review.md
+research_hank_affinity.md
+verification_any_qa.md
+test_reachability.js
+
+# Internal Prompt Files
+*_prompt*.txt
+scratch/
