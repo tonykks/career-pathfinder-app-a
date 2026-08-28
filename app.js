@@ -520,14 +520,79 @@ document.addEventListener('DOMContentLoaded', () => {
         link.click();
       } else {
         // PDF Export
-        const opt = {
-          margin: 10,
-          filename: `${name}_진로탐색리포트.pdf`,
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true },
-          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-        await html2pdf().set(opt).from(reportPrintable).save();
+        const canvas = await html2canvas(reportPrintable, { scale: 2, useCORS: true, scrollX: 0, scrollY: 0 });
+
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a4');
+
+        // A4 page width = 210mm, A4 page height = 297mm
+        // 10mm margins on both left and right -> width = 190mm
+        // 10mm margins on both top and bottom -> height = 277mm
+        const pdfWidth = 190;
+        const pdfHeight = 277;
+        
+        const scale = pdfWidth / canvas.width;
+        const scaledHeight = canvas.height * scale;
+
+        if (scaledHeight <= pdfHeight) {
+          const imgData = canvas.toDataURL('image/jpeg', 0.98);
+          pdf.addImage(imgData, 'JPEG', 10, 10, pdfWidth, scaledHeight);
+        } else {
+          const pageHeightPx = pdfHeight / scale;
+          let currentY = 0;
+          let isFirstPage = true;
+          const canvasScale = canvas.width / reportPrintable.offsetWidth;
+
+          const reportRect = reportPrintable.getBoundingClientRect();
+          const cards = Array.from(reportPrintable.querySelectorAll('.job-card')).map(card => {
+            const rect = card.getBoundingClientRect();
+            return {
+              top: (rect.top - reportRect.top) * canvasScale,
+              bottom: (rect.bottom - reportRect.top) * canvasScale
+            };
+          });
+
+          while (currentY < canvas.height) {
+            let sliceHeightPx = Math.min(pageHeightPx, canvas.height - currentY);
+            
+            // Avoid slicing through job cards by adjusting slice end to card top
+            const sliceEnd = currentY + sliceHeightPx;
+            if (sliceEnd < canvas.height) {
+              for (const card of cards) {
+                if (sliceEnd > card.top + 5 && sliceEnd < card.bottom - 5) {
+                  if (card.top > currentY) {
+                    sliceHeightPx = card.top - currentY;
+                    break;
+                  }
+                }
+              }
+            }
+            
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = canvas.width;
+            tempCanvas.height = sliceHeightPx;
+            
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.drawImage(
+              canvas,
+              0, currentY, canvas.width, sliceHeightPx,
+              0, 0, canvas.width, sliceHeightPx
+            );
+            
+            const imgData = tempCanvas.toDataURL('image/jpeg', 0.98);
+            const destHeight = sliceHeightPx * scale;
+            
+            if (!isFirstPage) {
+              pdf.addPage();
+            }
+            pdf.addImage(imgData, 'JPEG', 10, 10, pdfWidth, destHeight);
+            
+            isFirstPage = false;
+            currentY += sliceHeightPx;
+          }
+        }
+        
+        pdf.save(`${name}_진로탐색리포트.pdf`);
       }
       closeModal();
     } catch (err) {
