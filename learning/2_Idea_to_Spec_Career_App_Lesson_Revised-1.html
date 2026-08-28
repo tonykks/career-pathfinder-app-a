@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI와 한 가지씩 대화하며 내 생각 구체화하기 — 고등학생 진로 탐색 Web App 기획</title>
+<style>
+:root{
+  --bg:#081018; --panel:#111b28; --panel2:#162235; --line:#24344a; --line2:#1a283a;
+  --ink:#eef4fb; --muted:#aab7c8; --dim:#73849a; --accent:#7c8cff; --accent2:#44d0bd;
+  --accent3:#f7b955; --ok:#65d58b; --danger:#ff7f7f; --radius:16px;
+  --sans:-apple-system,BlinkMacSystemFont,"Pretendard","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;
+  --mono:ui-monospace,"SFMono-Regular","JetBrains Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; color:var(--ink); font-family:var(--sans); line-height:1.72;
+  background:
+    radial-gradient(900px 600px at 85% -10%,rgba(124,140,255,.12),transparent 60%),
+    radial-gradient(800px 500px at 0 20%,rgba(68,208,189,.08),transparent 55%),var(--bg);
+}
+.layout{display:flex;max-width:1600px;margin:0 auto;align-items:flex-start}
+.side{
+  width:292px;flex:none;position:sticky;top:0;height:100vh;overflow:auto;
+  border-right:1px solid var(--line2);background:rgba(8,16,24,.96);padding:28px 18px 90px
+}
+.brand{font-size:17px;font-weight:850;line-height:1.35;letter-spacing:-.02em}
+.brand-sub{font:11px/1.5 var(--mono);color:var(--dim);letter-spacing:.05em;margin:7px 0 22px}
+.side nav a{display:block;text-decoration:none;color:var(--muted);font-size:13px;padding:7px 10px;border-radius:8px;border-left:2px solid transparent;margin:2px 0}
+.side nav a:hover{background:rgba(124,140,255,.10);color:var(--ink)}
+.side nav a.active{background:rgba(124,140,255,.14);color:#aeb7ff;border-left-color:var(--accent);font-weight:700}
+.side .tiny{margin-top:24px;padding-top:18px;border-top:1px solid var(--line2);font-size:11.5px;color:var(--dim)}
+.main{flex:1;min-width:0}
+.mobile-nav{display:none;position:sticky;top:0;z-index:20;background:rgba(8,16,24,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line2);padding:9px 12px;overflow-x:auto;gap:7px}
+.mobile-nav a{flex:0 0 auto;text-decoration:none;font:11.5px var(--mono);color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:6px 10px}
+.wrap{max-width:1040px;margin:0 auto;padding:0 36px 120px}
+.hero{padding:72px 0 42px;border-bottom:1px solid var(--line2)}
+.kicker{font:12px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--accent2);margin:0 0 14px}
+h1{font-size:clamp(31px,5vw,48px);line-height:1.18;margin:0 0 16px;letter-spacing:-.035em}
+.lede{font-size:17px;color:var(--muted);max-width:80ch;margin:0}
+.meta{display:flex;flex-wrap:wrap;gap:9px;margin-top:24px}
+.tag{font:11px var(--mono);color:var(--muted);padding:6px 11px;border:1px solid var(--line);border-radius:999px;background:rgba(17,27,40,.7)}
+.section{padding-top:64px;scroll-margin-top:24px}
+.section-head{display:flex;gap:14px;align-items:flex-start;margin-bottom:12px}
+.num{font:700 12px var(--mono);background:var(--accent);color:#0a1020;border-radius:8px;padding:5px 9px;margin-top:7px}
+h2{font-size:clamp(23px,3.5vw,31px);line-height:1.3;margin:0;letter-spacing:-.02em}
+h3{font-size:17px;margin:0 0 8px}
+.sub{font:11px var(--mono);color:var(--dim);letter-spacing:.08em;margin:4px 0 0}
+.intro{color:var(--muted);font-size:15.5px;max-width:80ch;margin:14px 0 24px}
+.callout{background:linear-gradient(135deg,rgba(124,140,255,.10),rgba(68,208,189,.06));border:1px solid rgba(124,140,255,.30);border-radius:var(--radius);padding:20px 22px;margin:22px 0}
+.statement{font-size:clamp(20px,3vw,27px);line-height:1.55;font-weight:800;letter-spacing:-.02em;margin:0}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.card{background:var(--panel);border:1px solid var(--line2);border-radius:var(--radius);padding:17px 18px}
+.card .label{font:10px var(--mono);letter-spacing:.12em;color:var(--accent3);margin-bottom:8px}
+.card p,.card li{color:var(--muted);font-size:14px}
+.card ul{margin:8px 0 0;padding-left:18px}
+.pipeline{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;margin:20px 0}
+.pipe{flex:1 1 145px;background:var(--panel);border:1px solid var(--line2);border-radius:12px;padding:14px;min-height:108px}
+.pipe b{display:block;color:var(--ink);font-size:14px;margin-bottom:5px}
+.pipe span{display:block;color:var(--muted);font-size:12.8px}
+.arrow{align-self:center;color:var(--dim);font:20px var(--mono)}
+.prompt-card{position:relative;background:#05090e;border:1px solid var(--line);border-radius:14px;padding:18px;margin:14px 0}
+.prompt-card .step{font:700 10px var(--mono);letter-spacing:.12em;color:var(--accent2);margin-bottom:8px}
+.prompt-text{white-space:pre-wrap;color:#e7edf6;font-size:14px;padding-right:80px;font-family:var(--mono);line-height:1.6;max-height:480px;overflow-y:auto}
+.copy-btn{position:absolute;right:12px;top:12px;border:1px solid var(--line);background:var(--panel2);color:var(--muted);border-radius:8px;padding:7px 10px;cursor:pointer;font-size:12px;z-index:5}
+.copy-btn:hover{color:#fff;border-color:var(--accent)}
+.dialogue{display:grid;gap:10px;margin:16px 0}
+.bubble{border-radius:14px;padding:14px 16px;max-width:88%}
+.student{background:rgba(68,208,189,.09);border:1px solid rgba(68,208,189,.24);margin-left:auto}
+.ai{background:rgba(124,140,255,.10);border:1px solid rgba(124,140,255,.25)}
+.who{font:700 10px var(--mono);letter-spacing:.1em;margin-bottom:5px;color:var(--dim)}
+.compare{width:100%;border-collapse:collapse;margin:18px 0;font-size:13.5px}
+.compare th,.compare td{padding:12px;border-bottom:1px solid var(--line2);text-align:left;vertical-align:top}
+.compare th{font:11px var(--mono);letter-spacing:.08em;color:var(--dim)}
+.compare td{color:var(--muted)}
+.bad{color:var(--danger);font-weight:750}.good{color:var(--ok);font-weight:750}
+.ladder{display:grid;gap:10px;margin:18px 0}
+.rung{display:grid;grid-template-columns:64px 1fr;gap:12px;align-items:start;background:var(--panel);border:1px solid var(--line2);border-radius:12px;padding:14px}
+.rung .n{font:700 11px var(--mono);color:#c7ceff}
+.rung strong{display:block;margin-bottom:4px}.rung p{margin:0;color:var(--muted);font-size:14px}
+.final-msg{margin-top:26px;padding:24px;border-radius:16px;border:1px solid rgba(68,208,189,.3);background:rgba(68,208,189,.07)}
+.final-msg p{font-size:20px;font-weight:800;margin:0;line-height:1.6}
+.check{margin:14px 0 0;padding-left:20px;color:var(--muted)}
+.check li{margin:7px 0}
+footer{margin-top:72px;padding-top:24px;border-top:1px solid var(--line2);color:var(--dim);font:11px var(--mono);text-align:center}
+@media(max-width:1180px){.side{display:none}.mobile-nav{display:flex}.wrap{padding:0 22px 90px}}
+@media(max-width:720px){.cards{grid-template-columns:1fr}.hero{padding-top:44px}.wrap{padding-left:15px;padding-right:15px}.arrow{display:none}.prompt-text{padding-right:0;padding-top:34px}.rung{grid-template-columns:48px 1fr}.bubble{max-width:96%}}
+@media print{
+  body{background:#fff;color:#111}.side,.mobile-nav,.copy-btn{display:none!important}.wrap{max-width:none;padding:0 16mm 18mm}
+  .hero{padding-top:10mm}.card,.callout,.pipe,.prompt-card,.rung,.final-msg,.bubble{background:#fff!important;border-color:#bbb!important}
+  p,li,.intro,.lede,.card p,.card li,.pipe span,.prompt-text,.compare td,.rung p{color:#333!important}
+  h1,h2,h3,.statement,.final-msg p{color:#111!important}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside class="side">
+  <div class="brand">Idea to Spec Case<br>Mini Lesson</div>
+  <div class="brand-sub">AI VIBE CODING · IDEA REFINEMENT</div>
+  <nav id="toc">
+    <a href="#top">표지 · 학습 목표</a>
+    <a href="#concept">00 대화형 구체화 개념</a>
+    <a href="#initial">01 막연한 한 문장의 한계</a>
+    <a href="#rules">02 AI를 제어하는 7가지 규칙</a>
+    <a href="#interview">03 1:1 대화 구체화 과정</a>
+    <a href="#summary">04 구체화 결과 비교</a>
+    <a href="#intent-express">05 이렇게 말했어야 했다</a>
+    <a href="#spec">06 1차 requirements.md 생성</a>
+    <a href="#review">07 잠깐! 다시 검토하기</a>
+    <a href="#research">08 Research가 필요한 이유</a>
+    <a href="#edu">09 학생 교육용 시사점</a>
+  </nav>
+  <div class="tiny">한 페이지 HTML · 좌측 목차 / 우측 본문 · Responsive · 외부 Library 없음</div>
+</aside>
+
+<main class="main">
+<nav class="mobile-nav">
+  <a href="#concept">개념</a><a href="#initial">1차 시도</a><a href="#rules">대화 규칙</a>
+  <a href="#interview">1:1 대화</a><a href="#summary">결과 비교</a><a href="#intent-express">의도 표현</a><a href="#spec">1차 requirements</a><a href="#review">다시 검토</a><a href="#research">Research</a><a href="#edu">교육 가치</a>
+</nav>
+
+<div class="wrap">
+<header class="hero" id="top">
+  <p class="kicker">AI VIBE CODING · INTENT DISCOVERY LESSON</p>
+  <h1>AI와 한 가지씩 대화하며<br>내 생각 구체화하기</h1>
+  <p class="lede">
+    “진로 탐색 웹앱을 만들고 싶다”라는 막연한 한 문장으로 시작해, AI가 질문 하나씩만 던지도록 가두고
+    <strong>20번의 짧은 릴레이 질의응답을 거쳐 구현 가능한 수준의 1차 요구사항 명세서(requirements.md)로 정리</strong>하는 실제 수업 사례입니다.
+  </p>
+  <div class="meta">
+    <span class="tag">대상 · 코딩 완전 입문 고등학생</span>
+    <span class="tag">주제 · 고등학생 진로 탐색 Web App</span>
+    <span class="tag">방식 · 1대1 릴레이 인터뷰 (20 Turn)</span>
+    <span class="tag">결과물 · requirements.md 명세서</span>
+  </div>
+</header>
+
+<section class="section" id="concept">
+  <div class="section-head"><span class="num">00</span><div><h2>먼저 이해할 개념 — 왜 대화로 구체화해야 하는가?</h2><p class="sub">WHY DIALOGUE-DRIVEN SPECIFICATION?</p></div></div>
+  <div class="callout">
+    <p class="statement">AI에게 한 번에 “멋진 진로 탐색 웹앱 만들어줘”라고 프롬프트를 주면,<br>
+    부족한 정보를 AI가 스스로 추정하기 때문에 <strong>내가 생각한 방향과 다른 결과</strong>가 나올 수 있습니다.</p>
+  </div>
+  <p class="intro">
+    Vibe Coding의 핵심은 <strong>“학생이 주도권을 쥐고 의도(Intent)를 결정하는 것”</strong>입니다. AI가 질문을 던지게 만들고, 학생이 한 번에 하나씩 대답하면서 내 생각을 또렷하게 다듬어 가는 과정이 필수적입니다.
+  </p>
+</section>
+
+<section class="section" id="initial">
+  <div class="section-head"><span class="num">01</span><div><h2>막연한 한 문장의 한계 — 첫 프롬프트의 결과</h2><p class="sub">THE LIMITATION OF A VAGUE FIRST PROMPT</p></div></div>
+  <div class="prompt-card">
+    <div class="step">학생의 첫 프롬프트 입력</div>
+    <button class="copy-btn" onclick="copyText(this)">복사</button>
+    <div class="prompt-text">내게 맞는 진로 탐색을 하는 Web App을 만들고 싶습니다.</div>
+  </div>
+  <div class="cards">
+    <div class="card">
+      <div class="label">PROBLEM 1</div>
+      <h3>AI의 과도한 자의적 추론</h3>
+      <p>AI가 로그인, 회원가입, AI 적성 진단 모델, DB 구축처럼 내가 요청하지 않은 큰 기능을 제안하거나 추가할 수도 있습니다.</p>
+    </div>
+    <div class="card">
+      <div class="label">PROBLEM 2</div>
+      <h3>주도권 상실과 의도와 다른 결과</h3>
+      <p>학생은 AI가 만들어 준 결과가 자신이 정말 만들고 싶었던 것인지 판단하기 어려워지고, AI의 결정을 따라가기 쉬워집니다.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="rules">
+  <div class="section-head"><span class="num">02</span><div><h2>AI를 제어하는 7가지 규칙 — 질문만 하도록 가두기</h2><p class="sub">7 RULES TO CONTROL AI DIALOGUE</p></div></div>
+  <p class="intro">AI가 먼저 결론을 내리거나 코드를 짜지 못하도록, <strong>대화의 주도권을 학생이 쥐는 7가지 제어 프롬프트</strong>를 적용합니다.</p>
+  <div class="prompt-card">
+    <div class="step">AI 대화 제어 규칙 프롬프트</div>
+    <button class="copy-btn" onclick="copyText(this)">복사</button>
+    <div class="prompt-text">내게 맞는 진로 탐색을 하는 Web App을 만들고 싶습니다.
+
+지금은 Web App을 만들거나 방법을 설명하지 마세요.
+내가 무엇을 만들고 싶은지 스스로 정할 수 있도록 나에게 질문만 해주세요.
+
+규칙은 다음과 같습니다.
+1. 한 번에 질문은 정확히 하나만 해주세요.
+2. 내가 답하면 설명하거나 평가하지 말고 다음 질문 하나만 해주세요.
+3. 질문은 초등학생도 이해할 수 있는 쉬운 말로 해주세요.
+4. 내가 대답하기 어려울 때만 간단한 예를 2~3개 보여주세요.
+5. 내가 말하지 않은 내용을 AI가 대신 결정하지 마세요.
+6. 지금은 설명, 추천, 요약, 기능 목록, Coding을 하지 마세요.
+7. 내가 “이제 정리해줘”라고 말할 때까지 계속 질문만 해주세요.
+
+그럼 첫 번째 질문 하나만 해주세요.</div>
+  </div>
+</section>
+
+<section class="section" id="interview">
+  <div class="section-head"><span class="num">03</span><div><h2>1:1 대화 구체화 과정 — 20단계 릴레이 질의응답</h2><p class="sub">20-STEP TURN-BY-TURN INTERVIEW</p></div></div>
+  <p class="intro">규칙에 따라 AI는 오직 질문 하나씩만 던졌고, 학생이 답변하며 앱의 세부 기획을 구체화했습니다. <strong>20번은 이번 사례의 결과일 뿐</strong>이며, 다른 App은 더 적거나 더 많은 질문이 필요할 수 있습니다.</p>
+
+  <div class="dialogue">
+    <div class="bubble student"><div class="who">학생 (Q1 시작)</div>첫 번째 질문 하나만 해주세요.</div>
+    <div class="bubble ai"><div class="who">AI (Q1)</div>주로 누가(어떤 사람) 사용하게 하고 싶으신가요?</div>
+    <div class="bubble student"><div class="who">학생 (A1)</div>고등학생</div>
+
+    <div class="bubble ai"><div class="who">AI (Q2)</div>최종적으로 어떤 결과(결과물)를 얻어가길 바라시나요?</div>
+    <div class="bubble student"><div class="who">학생 (A2)</div>나에게 어울리는 추천 직업 목록</div>
+
+    <div class="bubble ai"><div class="who">AI (Q3)</div>직업 추천을 위해 어떤 정보(입력값)를 넣게 하고 싶으신가요?</div>
+    <div class="bubble student"><div class="who">학생 (A3)</div>학교에서 좋아하는 과목</div>
+
+    <div class="bubble ai"><div class="who">AI (Q4)</div>좋아하는 과목을 어떤 방식으로 선택하거나 적게 하고 싶으신가요?</div>
+    <div class="bubble student"><div class="who">학생 (A4)</div>과목별로 좋아하는 점수를 1~5점으로 매기기</div>
+
+    <div class="bubble ai"><div class="who">AI (Q5)</div>과목 목록은 미리 정해둘까요, 아니면 직접 추가할 수 있게 할까요?</div>
+    <div class="bubble student"><div class="who">학생 (A5)</div>기본 목록도 있고 학생이 새로운 과목을 직접 적어 넣을 수도 있게 하기</div>
+
+    <div class="bubble ai"><div class="who">AI (Q6)</div>결과 화면에 추천 직업 목록을 몇 개 정도 보여주고 싶으신가요?</div>
+    <div class="bubble student"><div class="who">학생 (A6)</div>가장 잘 어울리는 것 2개</div>
+
+    <div class="bubble ai"><div class="who">AI (Q7)</div>추천된 직업 2개와 함께 어떤 추가 내용을 보여주고 싶으신가요?</div>
+    <div class="bubble student"><div class="who">학생 (A7)</div>추천 이유, 하는 일 간단 설명, 관련 대학교 학과나 필요한 공부</div>
+
+    <div class="bubble ai"><div class="who">AI (Q8)</div>어떤 원리(방식)로 직업을 골라내게 하고 싶으신가요?</div>
+    <div class="bubble student"><div class="who">학생 (A8)</div>미리 정해둔 계산 규칙에 따라 점수가 가장 높은 쪽으로 연결하기</div>
+
+    <div class="bubble ai"><div class="who">AI (Q9)</div>로그인(회원가입)을 하고 쓰게 할까요, 아니면 로그인 없이 쓸까요?</div>
+    <div class="bubble student"><div class="who">학생 (A9)</div>로그인 없이 누구나 접속해서 바로 사용하기</div>
+
+    <div class="bubble ai"><div class="who">AI (Q10)</div>결과 화면을 저장하거나 공유하는 기능이 필요할까요?</div>
+    <div class="bubble student"><div class="who">학생 (A10)</div>결과 화면을 이미지나 PDF 파일로 다운로드하기</div>
+
+    <div class="bubble ai"><div class="who">AI (Q11)</div>디자인 분위기나 화면 느낌은 어떻게 만들고 싶으신가요?</div>
+    <div class="bubble student"><div class="who">학생 (A11)</div>깔끔하고 단정한 느낌</div>
+
+    <div class="bubble ai"><div class="who">AI (Q12)</div>1~5점 점수를 매길 때 어떤 도구(모양)를 쓰게 할까요?</div>
+    <div class="bubble student"><div class="who">학생 (A12)</div>별 모양을 1개부터 5개까지 누르기</div>
+
+    <div class="bubble ai"><div class="who">AI (Q13)</div>직접 추가한 과목은 직업 계산에 어떻게 반영되게 할까요?</div>
+    <div class="bubble student"><div class="who">학생 (A13)</div>과목 이름을 적을 때 관련 분야(인문/자연/예체능 등)를 함께 고르게 하기</div>
+
+    <div class="bubble ai"><div class="who">AI (Q14)</div>처음으로 돌아가서 다시 검사할 수 있는 버튼이 필요할까요?</div>
+    <div class="bubble student"><div class="who">학생 (A14)</div>뒤로 가기 버튼으로 방금 매긴 점수만 수정하기</div>
+
+    <div class="bubble ai"><div class="who">AI (Q15)</div>화면 맨 처음에 시작(안내) 화면을 따로 보여줄까요?</div>
+    <div class="bubble student"><div class="who">학생 (A15)</div>간단한 제목과 안내 화면 그리고 시작하기 버튼이 있는 첫 화면 보여주기</div>
+
+    <div class="bubble ai"><div class="who">AI (Q16)</div>웹 앱의 이름(제목)으로 생각해 두신 것이 있으신가요?</div>
+    <div class="bubble student"><div class="who">학생 (A16)</div>아직 없으니 나중에 정하거나 기본 이름으로 두기</div>
+
+    <div class="bubble ai"><div class="who">AI (Q17)</div>꼭 넣고 싶은 다른 특별한 기능이 있으신가요?</div>
+    <div class="bubble student"><div class="who">학생 (A17)</div>스마트폰 화면에서도 보기 편하게 만들기 (반응형)</div>
+
+    <div class="bubble ai"><div class="who">AI (Q18)</div>다운로드 파일에 이름이나 닉네임을 넣는 칸이 필요할까요?</div>
+    <div class="bubble student"><div class="who">학생 (A18)</div>이름/닉네임 입력칸을 두고 파일에 이름과 함께 출력하기</div>
+
+    <div class="bubble ai"><div class="who">AI (Q19)</div>이름/닉네임 입력은 언제 받게 할까요?</div>
+    <div class="bubble student"><div class="who">학생 (A19)</div>결과 화면에서 파일 다운로드 버튼 누를 때 이름 적기(반드시 적어야 다운로드 가능)</div>
+
+    <div class="bubble ai"><div class="who">AI (Q20)</div>이미지 파일과 PDF 파일 중 어떤 형식으로 할까요?</div>
+    <div class="bubble student"><div class="who">학생 (A20)</div>학생이 둘 중 하나를 직접 선택해서 다운로드</div>
+
+    <div class="bubble student"><div class="who">학생 (종료)</div>이제 정리를 해줘요</div>
+  </div>
+
+  <div class="callout">
+    <strong>💡 꼭 기억할 점:</strong><br>
+    AI가 어떤 기능을 물어봤다고 해서 반드시 “필요해요”라고 답할 필요는 없습니다.
+    질문이 계속될수록 App의 기능이 커질 수도 있으므로, <strong>“이 기능이 정말 내 목적에 필요한가?”를 결정하는 사람은 학생</strong>입니다.
+  </div>
+</section>
+
+<section class="section" id="summary">
+  <div class="section-head"><span class="num">04</span><div><h2>구체화 결과 비교 — 짧은 질문 vs 20단계 질의응답</h2><p class="sub">BEFORE VS AFTER COMPARISON</p></div></div>
+  <table class="compare">
+    <thead>
+      <tr>
+        <th>구분</th>
+        <th>처음 시작 (한 문장 프롬프트)</th>
+        <th>구체화 후 (20단계 질의응답 완료)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>타깃 사용자</strong></td>
+        <td><span class="bad">불명확 (누구나 사용할 수 있음)</span></td>
+        <td><span class="good">고등학생 (1~3학년)</span></td>
+      </tr>
+      <tr>
+        <td><strong>입력 방식</strong></td>
+        <td><span class="bad">AI가 자의적으로 결정</span></td>
+        <td><span class="good">기본 과목 별점(1~5점) + 계열 매핑 기반 과목 직접 추가</span></td>
+      </tr>
+      <tr>
+        <td><strong>추천 알고리즘</strong></td>
+        <td><span class="bad">AI가 계산 방식을 임의로 정할 수 있음</span></td>
+        <td><span class="good">사전 정의 룰 기반(Rule-based) 분야별 점수 합산 가산</span></td>
+      </tr>
+      <tr>
+        <td><strong>결과 화면</strong></td>
+        <td><span class="bad">직업 이름만 텍스트 노출</span></td>
+        <td><span class="good">Top 2 직업 카드 (이유, 주요 업무, 대학 학과, 권장 공부)</span></td>
+      </tr>
+      <tr>
+        <td><strong>부가 기능</strong></td>
+        <td><span class="bad">없음</span></td>
+        <td><span class="good">뒤로가기 점수 수정 + 이름 검증 팝업 + PNG/PDF 리포트 저장</span></td>
+      </tr>
+      <tr>
+        <td><strong>디자인/환경</strong></td>
+        <td><span class="bad">기본 웹 화면</span></td>
+        <td><span class="good">단정하고 깔끔한 아카데믹 톤앤매너 + 모바일 반응형 최적화</span></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="section" id="intent-express">
+  <div class="section-head"><span class="num">05</span><div><h2>“이렇게 말했어야 했다” — 내 의도를 문장으로 표현하기</h2><p class="sub">HOW TO CLEARLY EXPRESS INTENT IN NATURAL PROSE</p></div></div>
+  <p class="intro">
+    처음 한 문장(<em>“내게 맞는 진로 탐색 웹앱을 만들고 싶다”</em>)으로 프롬프트를 주었을 때 왜 원하는 결과가 나오지 않았을까요? 
+    학생이 머릿속에 품고 있던 <strong>진짜 의도(Intent)</strong>를 AI에게 온전한 문장 형태로 전달하지 못했기 때문입니다.
+    20번의 대화를 통해 구체화된 생각을 한 편의 <strong>1차 설명 문장</strong>으로 정리하면 다음과 같습니다.
+  </p>
+
+  <div class="prompt-card">
+    <div class="step">학생의 의도가 구체적으로 담긴 1차 설명 문장 (Intent Statement)</div>
+    <button class="copy-btn" onclick="copyText(this)">복사</button>
+    <div class="prompt-text">“저는 고등학생들이 별도의 회원가입이나 로그인 없이 웹 브라우저에서 바로 사용할 수 있는, 깔끔하고 단정한 느낌의 ‘맞춤형 진로 탐색 Web App’을 만들고 싶습니다. 
+
+이 앱은 스마트폰 모바일 화면에서도 보기 편해야 하며, 접속하면 간단한 제목과 안내 문구, ‘시작하기’ 버튼이 있는 첫 화면이 나옵니다. 
+
+검사가 시작되면 학교에서 배우는 기본 교과목 목록이 나타나고, 학생은 각 과목을 얼마나 좋아하는지 1점부터 5점까지 ‘별 모양 아이콘’을 눌러 점수를 매깁니다. 만약 목록에 없는 과목을 공부하고 있다면 학생이 직접 새로운 과목 이름을 적어 넣을 수 있는데, 이때 직업 계산에 정확히 반영되도록 인문/자연/예체능 같은 관련 계열 분야를 함께 선택하게 합니다.
+
+모든 점수 입력이 끝나면 복잡한 외부 인공지능 분석 대신, 우리가 미리 정해둔 계산 규칙에 따라 점수가 가장 높은 상위 2개의 추천 직업을 찾아냅니다. 
+
+결과 화면에는 선정된 2개 직업과 함께 ‘그 직업을 추천한 이유’, ‘실제 하는 일에 대한 간단한 설명’, 그리고 ‘관련 대학교 학과 및 고등학교에서 필요한 공부’가 보기 좋게 정리되어 나타납니다. 
+
+결과를 확인한 후에는 ‘뒤로 가기’ 버튼을 눌러 방금 매긴 과목 점수만 손쉽게 수정할 수 있어야 합니다. 
+
+마지막으로 학생이 이 결과를 이미지(PNG)나 PDF 파일 중 원하는 형식을 골라 다운로드할 수 있는데, 다운로드 버튼을 누르면 반드시 본인의 이름이나 닉네임을 입력하는 창이 떠서 이름을 적어야만 리포트 파일에 이름이 함께 출력되어 저장되도록 만들고 싶습니다.”</div>
+  </div>
+
+  <div class="callout">
+    <strong>💡 교육 포인트:</strong><br>
+    “처음부터 이렇게 길고 구체적인 문장을 쓸 수 있는 사람은 많지 않습니다. 
+    하지만 <strong>AI에게 질문을 던지게 하고 한 번에 하나씩 대답하다 보면</strong>, 머릿속에 흩어져 있던 생각을 훨씬 구체적으로 정리할 수 있습니다. 
+    이 문장을 바탕으로 AI에게 <strong>구현할 수 있을 만큼 구체화된 1차 요구사항(requirements.md)</strong>을 만들게 할 수 있습니다. 다만 이것이 곧 ‘정확하고 완벽한 요구사항’이라는 뜻은 아니므로 다음 단계에서 다시 검토해야 합니다.”
+  </div>
+</section>
+
+<section class="section" id="spec">
+  <div class="section-head"><span class="num">06</span><div><h2>1차 requirements.md 생성 — AI 에이전트 개발용 명세서</h2><p class="sub">FIRST REQUIREMENTS DOCUMENT</p></div></div>
+  <p class="intro">20단계 질의응답과 구체화된 의도 문장을 바탕으로 AI가 <strong>1차로 정리한 요구사항 명세서</strong> 전문입니다. 다음 단계에서 이 문서에 학생이 정하지 않은 내용이나 근거가 부족한 내용이 섞였는지 다시 확인합니다.</p>
+
+  <div class="prompt-card">
+    <div class="step">AI가 정리한 1차 requirements.md 전문 · 검토 전</div>
+    <button class="copy-btn" onclick="copyText(this)">복사</button>
+    <div class="prompt-text"># Requirements Document: 고등학생 맞춤형 진로 탐색 Web App
+
+## 1. 프로젝트 개요 (Project Overview)
+- **프로젝트 명칭:** 고등학생 맞춤형 진로 탐색기 (Career Pathfinder for High School Students)
+- **프로젝트 목적:** 고등학생이 자신의 교과목 선호도(1~5점)를 바탕으로 규칙 기반(Rule-based) 알고리즘을 통해 가장 적합한 2가지 진로/직업을 추천받고, 구체적인 학과 및 학습 로드맵을 이미지/PDF로 저장할 수 있는 경량 웹 애플리케이션 구축
+- **핵심 가치:** 
+  - 무가입/무로그인 즉시 접근성
+  - 직관적인 별점 인터랙션 및 교과목 커스텀 확장성
+  - 투명하고 설명 가능한 계산 로직 (Explainable Rule-based Scoring)
+  - 학생 개인화 리포트 다운로드 (PNG/PDF)
+
+---
+
+## 2. 사용자 페르소나 및 대상 환경 (Target & Persona)
+- **주 사용자:** 진로와 학과 선택을 고민하는 고등학생 (1~3학년)
+- **사용 환경:** 
+  - 스마트폰(Mobile First) 및 PC/태블릿 웹 브라우저
+  - 화면 해상도에 구애받지 않는 반응형 웹(Responsive Web UI)
+- **톤앤매너 (Design Tone & Manner):**
+  - 군더더기 없이 깔끔하고 단정하며 정돈된 아카데믹 스타일
+  - 신뢰감을 주는 모던한 컬러 팔레트 (Slate Blue / Calm Teal / Off-White 계열)
+
+---
+
+## 3. 시스템 아키텍처 및 기술 제약사항 (Technical Stack & Architecture)
+- **구현 형태:** 단일 페이지 애플리케이션(SPA) 또는 경량 정적 웹(Single-file / Static Web)
+- **프론트엔드 제약사항:**
+  - 외부 백엔드 서버나 DB 없이 브라우저 단독(Client-side) 구동 가능
+  - 세션 기반 상태 관리 (페이지 새로고침 전까지 입력값 보존)
+  - HTML5, CSS3, Vanilla JavaScript (또는 경량 UI 라이브러리)
+- **결과물 출력(Export) 라이브러리:**
+  - PDF 생성: `html2pdf.js` 또는 `jspdf`
+  - 이미지 캡처: `html2canvas`
+
+---
+
+## 4. 상세 기능 요구사항 (Functional Requirements)
+
+### 4.1 시작 화면 (Intro Screen)
+- **FR-1.1 기본 정보 노출:** 서비스 명칭, 간단한 검사 가이드 및 목적 설명
+- **FR-1.2 시작 버튼:** '진로 탐색 시작하기' 버튼 클릭 시 교과목 선호도 평가 화면으로 전환
+
+### 4.2 과목 선호도 평가 화면 (Rating Screen)
+- **FR-2.1 기본 교과목 목록 제공:**
+  - 국어, 수학, 영어, 한국사, 사회탐구(일반사회/지리/윤리/역사), 과학탐구(물리/화학/생명과학/지구과학), 정보/코딩, 기술·가정, 미술/음악/체육, 제2외국어 등 표준 고교 교과목군 제공
+- **FR-2.2 별점(Star Rating) 인터랙션:**
+  - 각 과목별 1점부터 5점까지 별 모양 아이콘 클릭/터치로 직관적 입력 (기본값: 미선택 또는 3점)
+- **FR-2.3 사용자 직접 과목 추가 (Custom Subject Entry):**
+  - 기본 목록 외 학생이 과목명을 직접 텍스트로 입력하여 추가 가능
+  - 과목 추가 시 반드시 **관련 계열(분야: 인문사회, 자연과학/공학, IT/소프트웨어, 예체능, 의약/바이오, 경영/경제 등)** 중 하나를 드롭다운으로 선택하도록 강제
+- **FR-2.4 결과 확인 트리거:**
+  - 필수 기본 과목 평가 완료 시 '결과 분석하기' 버튼 활성화
+
+### 4.3 추천 계산 로직 (Scoring & Recommendation Engine)
+- **FR-3.1 계열별 점수 가산:**
+  - 각 과목은 사전 정의된 1~2개 진로 분야(Domain)와 연결
+  - 추가된 커스텀 과목은 사용자가 지정한 계열에 해당 별점 가중치를 부여
+- **FR-3.2 직업 매핑 알고리즘:**
+  - 총합 점수가 가장 높은 상위 2개 직업군/직업을 최종 선정 (동점자 발생 시 우선순위 가중치 규칙 적용)
+- **FR-3.3 직업별 상세 콘텐츠 데이터셋:**
+  - **직업명:** 명확한 직업 명칭
+  - **추천 이유:** 학생이 높은 점수를 준 과목과의 구체적 연계성 서술
+  - **주요 업무/역할:** 해당 직업이 실제 현장에서 하는 일 요약
+  - **관련 대학 학과:** 진학 가능한 대학교 전공 목록
+  - **권장 고교 학습 과목:** 고교 재학 중 이수/집중하면 좋은 과목 가이드
+
+### 4.4 결과 확인 및 세부 기능 (Result Screen)
+- **FR-4.1 Top 2 결과 카드 UI:** 상위 2개 직업을 독립된 카드로 가독성 있게 노출
+- **FR-4.2 점수 수정(뒤로 가기) 기능:**
+  - '뒤로 가기 / 점수 수정' 버튼 클릭 시 이전 화면으로 복귀하며, 기존에 매겨둔 별점 및 추가 과목 리스트가 초기화되지 않고 유지됨
+
+### 4.5 리포트 내보내기 (Export & Reporting)
+- **FR-5.1 이름/닉네임 입력 모달 (Validation Gate):**
+  - '결과 다운로드' 클릭 시 모달 팝업 표시
+  - 학생의 이름 또는 닉네임 입력을 필수로 요구 (공백 시 다운로드 진행 불가 안내)
+- **FR-5.2 포맷 선택 다운로드:**
+  - 사용자가 **이미지 파일(PNG)** 또는 **문서 파일(PDF)** 중 포맷을 선택 가능
+- **FR-5.3 출력 템플릿 레이아웃:**
+  - 다운로드 파일 상단에 `[학생 이름/닉네임] 님의 진로 관심 탐색 결과 리포트` 헤더 및 생성 일자 명시
+  - 추천 직업 2종 및 상세 설명이 깔끔하게 정돈된 인쇄용 규격 레이아웃으로 렌더링
+
+---
+
+## 5. 비기능 요구사항 (Non-Functional Requirements)
+- **NFR-1 (반응형 최적화):** 모바일(360px~480px), 태블릿(768px), 데스크톱(1024px 이상) 전 해상도 대응
+- **NFR-2 (개인정보 보호):** 입력받은 이름/닉네임 및 과목 점수는 서버에 저장되지 않고 클라이언트 렌더링/다운로드 즉시 휘발
+- **NFR-3 (성능 및 사용성):** 별도 통신 지연 없이 0.1초 내 결과 계산 완료
+
+---
+
+## 6. 화면 흐름도 (Page Flow)
+```
+[1. 시작 안내 화면]
+       │
+       ▼ (시작하기 버튼 클릭)
+[2. 과목별 선호도 별점 평가 화면] ── (사용자 과목 직접 추가)
+       │
+       ▼ (결과 보기 클릭)
+[3. 추천 직업 Top 2 결과 화면] ◄─── (뒤로 가기로 점수 수정 가능)
+       │
+       ▼ (다운로드 버튼 클릭)
+[4. 이름/닉네임 입력 모달 (필수)]
+       │
+       ▼ (PNG / PDF 선택)
+[5. 개인화 리포트 파일 저장]
+```</div>
+  </div>
+</section>
+
+<section class="section" id="review">
+  <div class="section-head"><span class="num">07</span><div><h2>잠깐! 자세하다고 맞는 것은 아니다</h2><p class="sub">DETAILED DOES NOT ALWAYS MEAN CORRECT</p></div></div>
+  <p class="intro">
+    requirements.md가 길고 자세해졌다고 해서 바로 Coding으로 넘어가면 안 됩니다.
+    <strong>학생이 직접 결정한 내용</strong>과 <strong>AI가 빈칸을 채우며 추가한 내용</strong>이 섞여 있을 수 있기 때문입니다.
+  </p>
+
+  <div class="cards">
+    <div class="card">
+      <div class="label">CHECK 1 · 우리가 정했나?</div>
+      <h3>AI가 새로 넣은 내용 찾기</h3>
+      <p>대화에서는 “깔끔하고 단정한 느낌”이라고만 했는데 requirements.md에는 Slate Blue / Calm Teal / Off-White가 추가되었습니다. HTML5, Vanilla JavaScript, html2pdf.js, 0.1초 같은 기술·성능 기준도 학생이 직접 정한 내용은 아닙니다.</p>
+    </div>
+    <div class="card">
+      <div class="label">CHECK 2 · 근거가 있나?</div>
+      <h3>계산 규칙도 검증해야 한다</h3>
+      <p>“좋아하는 교과목 점수 → 진로 분야 → 추천 직업”이라는 연결이 실제로 믿을 만한 진로 자료에 근거하는지 별도로 확인해야 합니다. 자세한 문장만으로 근거가 생기는 것은 아닙니다.</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>학생에게 던질 세 가지 질문</strong><br><br>
+    ① 우리가 직접 결정하지 않은 내용이 들어가지는 않았나요?<br>
+    ② 계산과 추천에 실제로 믿을 만한 근거가 있나요?<br>
+    ③ 기능은 많아졌지만, 처음 내가 만들고 싶었던 App과 같은가요?
+  </div>
+
+  <div class="final-msg">
+    <p>“AI에게 ‘마음대로 정하지 마’라고 해도 빈칸을 채우는 제안을 할 수 있다.<br>그래서 마지막 판단은 사람이 다시 해야 한다.”</p>
+  </div>
+</section>
+
+<section class="section" id="research">
+  <div class="section-head"><span class="num">08</span><div><h2>그래서 Research와 검증이 필요하다</h2><p class="sub">RESEARCH → CROSS-CHECK → IMPLEMENT</p></div></div>
+  <p class="intro">
+    이제 필요한 것은 더 긴 Prompt가 아니라 <strong>근거 확인</strong>입니다.
+    커리어넷, 고용24, O*NET 등 공식·신뢰 가능한 진로 자료를 조사하고,
+    한 AI가 찾은 내용을 다른 AI가 다시 확인한 뒤에야 구현에 사용할 기준을 정합니다.
+  </p>
+
+  <div class="pipeline">
+    <div class="pipe"><b>1차 requirements.md</b><span>대화로 구체화된 설계</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe"><b>Research</b><span>공식 진로 자료와 근거 조사</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe"><b>Cross-check</b><span>다른 AI가 출처와 논리 재확인</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe"><b>구분</b><span>근거 있는 내용 / 구현 가정</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe"><b>Agent 구현</b><span>검토된 기준으로 Coding</span></div>
+  </div>
+
+  <div class="callout">
+    <strong>이번 App A에서의 원칙:</strong><br>
+    Research는 Gemini가 만든 requirements.md의 핵심 구조를 마음대로 바꾸기 위한 것이 아닙니다.
+    문서에 비어 있는 진로 정보와 Mapping의 근거를 확인하고, 근거가 없으면 <strong>“구현을 위한 가정”이라고 솔직하게 표시</strong>하기 위한 단계입니다.
+  </div>
+</section>
+
+<section class="section" id="edu">
+  <div class="section-head"><span class="num">09</span><div><h2>학생 교육용 핵심 포인트 — Vibe Coding 수업의 시사점</h2><p class="sub">EDUCATIONAL INSIGHTS</p></div></div>
+  <ul class="check">
+    <li><strong>프롬프트 길이보다 중요한 대화 제어:</strong> 무작정 긴 프롬프트를 주는 것보다, AI가 먼저 결정하지 못하도록 질의응답 규칙을 설계하는 것이 핵심입니다.</li>
+    <li><strong>학생 주도 기획(Intent Ownership):</strong> 질문에 답하는 동안 학생은 자신이 만들 Web App의 방향과 필요한 기능을 하나씩 결정합니다. 질문 횟수 자체가 목표는 아닙니다.</li>
+    <li><strong>AI의 결과도 다시 검토:</strong> AI가 만든 requirements.md에는 학생이 직접 정하지 않은 내용이나 근거가 부족한 내용이 들어갈 수 있으므로 사람이 다시 확인해야 합니다.</li>
+    <li><strong>Research 후 Agent 개발 연계:</strong> 필요한 근거를 조사하고 다른 AI의 Cross-check를 거친 뒤, 검토된 요구사항을 Google Antigravity IDE의 AI Agent에게 전달하여 구현합니다.</li>
+  </ul>
+
+  <div class="final-msg">
+    <p>“좋은 Vibe Coding은 AI에게 한 번에 완벽한 답을 받는 것이 아니라,<br>내 생각을 구체화하고 → AI의 정리를 다시 검토하고 → 근거를 확인한 뒤 → Agent와 함께 구현하는 과정입니다.”</p>
+  </div>
+</section>
+
+<footer>AI Vibe Coding Case Study · Idea to Spec Lesson · Single-file HTML · 2026</footer>
+</div>
+</main>
+</div>
+
+<script>
+function copyText(btn){
+  const text = btn.parentElement.querySelector('.prompt-text').innerText;
+  navigator.clipboard.writeText(text).then(()=>{
+    const old=btn.textContent; btn.textContent='복사됨';
+    setTimeout(()=>btn.textContent=old,1200);
+  }).catch(()=>{ alert('복사할 문장을 선택해 직접 복사해 주세요.'); });
+}
+(function(){
+  const links=[...document.querySelectorAll('#toc a')];
+  const targets=links.map(a=>document.querySelector(a.getAttribute('href'))).filter(Boolean);
+  const update=()=>{
+    let current=targets[0];
+    for(const el of targets){ if(el.getBoundingClientRect().top<=120) current=el; }
+    links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+current.id));
+  };
+  document.addEventListener('scroll',update,{passive:true}); update();
+})();
+</script>
+</body>
+</html>

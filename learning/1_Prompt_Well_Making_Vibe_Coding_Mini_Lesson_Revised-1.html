@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prompt 잘 만들기 — AI와 한 가지씩 대화하며 내 생각 구체화하기</title>
+<style>
+:root{
+  --bg:#081018; --panel:#111b28; --panel2:#162235; --line:#24344a; --line2:#1a283a;
+  --ink:#eef4fb; --muted:#aab7c8; --dim:#73849a; --accent:#7c8cff; --accent2:#44d0bd;
+  --accent3:#f7b955; --ok:#65d58b; --danger:#ff7f7f; --radius:16px;
+  --sans:-apple-system,BlinkMacSystemFont,"Pretendard","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;
+  --mono:ui-monospace,"SFMono-Regular","JetBrains Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; color:var(--ink); font-family:var(--sans); line-height:1.72;
+  background:
+    radial-gradient(900px 600px at 85% -10%,rgba(124,140,255,.12),transparent 60%),
+    radial-gradient(800px 500px at 0 20%,rgba(68,208,189,.08),transparent 55%),var(--bg);
+}
+.layout{display:flex;max-width:1600px;margin:0 auto;align-items:flex-start}
+.side{
+  width:292px;flex:none;position:sticky;top:0;height:100vh;overflow:auto;
+  border-right:1px solid var(--line2);background:rgba(8,16,24,.96);padding:28px 18px 90px
+}
+.brand{font-size:17px;font-weight:850;line-height:1.35;letter-spacing:-.02em}
+.brand-sub{font:11px/1.5 var(--mono);color:var(--dim);letter-spacing:.05em;margin:7px 0 22px}
+.side nav a{display:block;text-decoration:none;color:var(--muted);font-size:13px;padding:7px 10px;border-radius:8px;border-left:2px solid transparent;margin:2px 0}
+.side nav a:hover{background:rgba(124,140,255,.10);color:var(--ink)}
+.side nav a.active{background:rgba(124,140,255,.14);color:#aeb7ff;border-left-color:var(--accent);font-weight:700}
+.side .tiny{margin-top:24px;padding-top:18px;border-top:1px solid var(--line2);font-size:11.5px;color:var(--dim)}
+.main{flex:1;min-width:0}
+.mobile-nav{display:none;position:sticky;top:0;z-index:20;background:rgba(8,16,24,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line2);padding:9px 12px;overflow-x:auto;gap:7px}
+.mobile-nav a{flex:0 0 auto;text-decoration:none;font:11.5px var(--mono);color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:6px 10px}
+.wrap{max-width:1040px;margin:0 auto;padding:0 36px 120px}
+.hero{padding:72px 0 42px;border-bottom:1px solid var(--line2)}
+.kicker{font:12px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--accent2);margin:0 0 14px}
+h1{font-size:clamp(31px,5vw,48px);line-height:1.18;margin:0 0 16px;letter-spacing:-.035em}
+.lede{font-size:17px;color:var(--muted);max-width:80ch;margin:0}
+.meta{display:flex;flex-wrap:wrap;gap:9px;margin-top:24px}
+.tag{font:11px var(--mono);color:var(--muted);padding:6px 11px;border:1px solid var(--line);border-radius:999px;background:rgba(17,27,40,.7)}
+.section{padding-top:64px;scroll-margin-top:24px}
+.section-head{display:flex;gap:14px;align-items:flex-start;margin-bottom:12px}
+.num{font:700 12px var(--mono);background:var(--accent);color:#0a1020;border-radius:8px;padding:5px 9px;margin-top:7px}
+h2{font-size:clamp(23px,3.5vw,31px);line-height:1.3;margin:0;letter-spacing:-.02em}
+h3{font-size:17px;margin:0 0 8px}
+.sub{font:11px var(--mono);color:var(--dim);letter-spacing:.08em;margin:4px 0 0}
+.intro{color:var(--muted);font-size:15.5px;max-width:80ch;margin:14px 0 24px}
+.callout{background:linear-gradient(135deg,rgba(124,140,255,.10),rgba(68,208,189,.06));border:1px solid rgba(124,140,255,.30);border-radius:var(--radius);padding:20px 22px;margin:22px 0}
+.statement{font-size:clamp(20px,3vw,27px);line-height:1.55;font-weight:800;letter-spacing:-.02em;margin:0}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.card{background:var(--panel);border:1px solid var(--line2);border-radius:var(--radius);padding:17px 18px}
+.card .label{font:10px var(--mono);letter-spacing:.12em;color:var(--accent3);margin-bottom:8px}
+.card p,.card li{color:var(--muted);font-size:14px}
+.card ul{margin:8px 0 0;padding-left:18px}
+.pipeline{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;margin:20px 0}
+.pipe{flex:1 1 145px;background:var(--panel);border:1px solid var(--line2);border-radius:12px;padding:14px;min-height:108px}
+.pipe b{display:block;color:var(--ink);font-size:14px;margin-bottom:5px}
+.pipe span{display:block;color:var(--muted);font-size:12.8px}
+.arrow{align-self:center;color:var(--dim);font:20px var(--mono)}
+.prompt-card{position:relative;background:#05090e;border:1px solid var(--line);border-radius:14px;padding:18px;margin:14px 0}
+.prompt-card .step{font:700 10px var(--mono);letter-spacing:.12em;color:var(--accent2);margin-bottom:8px}
+.prompt-text{white-space:pre-wrap;color:#e7edf6;font-size:14.5px;padding-right:80px}
+.copy-btn{position:absolute;right:12px;top:12px;border:1px solid var(--line);background:var(--panel2);color:var(--muted);border-radius:8px;padding:7px 10px;cursor:pointer;font-size:12px}
+.copy-btn:hover{color:#fff;border-color:var(--accent)}
+.dialogue{display:grid;gap:10px;margin:16px 0}
+.bubble{border-radius:14px;padding:14px 16px;max-width:88%}
+.student{background:rgba(68,208,189,.09);border:1px solid rgba(68,208,189,.24);margin-left:auto}
+.ai{background:rgba(124,140,255,.10);border:1px solid rgba(124,140,255,.25)}
+.who{font:700 10px var(--mono);letter-spacing:.1em;margin-bottom:5px;color:var(--dim)}
+.compare{width:100%;border-collapse:collapse;margin:18px 0;font-size:13.5px}
+.compare th,.compare td{padding:12px;border-bottom:1px solid var(--line2);text-align:left;vertical-align:top}
+.compare th{font:11px var(--mono);letter-spacing:.08em;color:var(--dim)}
+.compare td{color:var(--muted)}
+.bad{color:var(--danger);font-weight:750}.good{color:var(--ok);font-weight:750}
+.ladder{display:grid;gap:10px;margin:18px 0}
+.rung{display:grid;grid-template-columns:64px 1fr;gap:12px;align-items:start;background:var(--panel);border:1px solid var(--line2);border-radius:12px;padding:14px}
+.rung .n{font:700 11px var(--mono);color:#c7ceff}
+.rung strong{display:block;margin-bottom:4px}.rung p{margin:0;color:var(--muted);font-size:14px}
+.final-msg{margin-top:26px;padding:24px;border-radius:16px;border:1px solid rgba(68,208,189,.3);background:rgba(68,208,189,.07)}
+.final-msg p{font-size:20px;font-weight:800;margin:0;line-height:1.6}
+.check{margin:14px 0 0;padding-left:20px;color:var(--muted)}
+.check li{margin:7px 0}
+footer{margin-top:72px;padding-top:24px;border-top:1px solid var(--line2);color:var(--dim);font:11px var(--mono);text-align:center}
+@media(max-width:1180px){.side{display:none}.mobile-nav{display:flex}.wrap{padding:0 22px 90px}}
+@media(max-width:720px){.cards{grid-template-columns:1fr}.hero{padding-top:44px}.wrap{padding-left:15px;padding-right:15px}.arrow{display:none}.prompt-text{padding-right:0;padding-top:34px}.rung{grid-template-columns:48px 1fr}.bubble{max-width:96%}}
+@media print{
+  body{background:#fff;color:#111}.side,.mobile-nav,.copy-btn{display:none!important}.wrap{max-width:none;padding:0 16mm 18mm}
+  .hero{padding-top:10mm}.card,.callout,.pipe,.prompt-card,.rung,.final-msg,.bubble{background:#fff!important;border-color:#bbb!important}
+  p,li,.intro,.lede,.card p,.card li,.pipe span,.prompt-text,.compare td,.rung p{color:#333!important}
+  h1,h2,h3,.statement,.final-msg p{color:#111!important}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside class="side">
+  <div class="brand">Prompt 잘 만들기<br>Mini Lesson</div>
+  <div class="brand-sub">AI VIBE CODING · IDEA REFINEMENT</div>
+  <nav id="toc">
+    <a href="#top">표지 · 오늘의 목표</a>
+    <a href="#concept">00 먼저 이해할 개념</a>
+    <a href="#first">01 일부러 한 문장만</a>
+    <a href="#discover">02 왜 답이 달라졌을까</a>
+    <a href="#practice">03 규칙을 하나씩 추가</a>
+    <a href="#finalprompt">04 최종 실습 Prompt</a>
+    <a href="#dialogue">05 실제 대화 예시</a>
+    <a href="#growth">06 한 문장이 자라는 과정</a>
+    <a href="#compare">07 첫 번째와 다시 비교</a>
+    <a href="#takeaway">08 오늘 발견할 원리</a>
+  </nav>
+  <div class="tiny">한 페이지 HTML · 좌측 목차 / 우측 본문 · Copy 버튼 · Responsive · 외부 Library 없음</div>
+</aside>
+
+<main class="main">
+<nav class="mobile-nav">
+  <a href="#concept">개념</a><a href="#first">1차 체험</a><a href="#practice">Prompt 실습</a>
+  <a href="#finalprompt">최종 Prompt</a><a href="#dialogue">대화</a><a href="#takeaway">정리</a>
+</nav>
+
+<div class="wrap">
+<header class="hero" id="top">
+  <p class="kicker">AI VIBE CODING · PROMPT PRACTICE</p>
+  <h1>Prompt 잘 만들기</h1>
+  <p class="lede">
+    처음부터 긴 Prompt를 외우지 않습니다. 먼저 한 문장으로 AI와 대화해 보고,
+    원하는 방향으로 잘 가지 않는 경험을 한 뒤 <strong>“AI가 어떻게 대답해야 하는지”를 한 가지씩 추가</strong>해 봅니다.
+    목표는 멋진 Prompt를 암기하는 것이 아니라, <strong>내 생각을 AI와 함께 차근차근 구체화하는 방법</strong>을 발견하는 것입니다.
+  </p>
+  <div class="meta">
+    <span class="tag">대상 · 코딩 완전 입문 고등학생</span>
+    <span class="tag">도구 · Google Gemini</span>
+    <span class="tag">출발 · 한 문장 아이디어</span>
+    <span class="tag">방법 · 한 번에 질문 하나</span>
+    <span class="tag">목표 · 내가 방향을 결정</span>
+  </div>
+</header>
+
+<section class="section" id="concept">
+  <div class="section-head"><span class="num">00</span><div><h2>먼저 이해할 개념 — Prompt는 “정답 주문서”가 아니다</h2><p class="sub">WHAT IS A GOOD PROMPT?</p></div></div>
+  <div class="callout">
+    <p class="statement">좋은 Prompt는 AI에게 <strong>무엇을 해달라</strong>고 말하는 것뿐 아니라,<br><strong>나와 어떤 방식으로 대화해 달라</strong>고 알려주는 말이다.</p>
+  </div>
+  <p class="intro">
+    처음에는 학생이 만들고 싶은 것을 딱 한 문장으로 말합니다. 그다음 AI가 너무 앞서가거나 예상과 다른 방향으로 가는 것을 직접 경험합니다.
+    그리고 다시 시작해 <strong>“질문 하나만 해줘”</strong>라는 작은 규칙부터 추가합니다.
+  </p>
+</section>
+
+<section class="section" id="first">
+  <div class="section-head"><span class="num">01</span><div><h2>첫 번째 체험 — 일부러 한 문장만 입력한다</h2><p class="sub">EXPERIENCE THE CONFUSION FIRST</p></div></div>
+  <div class="prompt-card">
+    <div class="step">첫 입력</div>
+    <button class="copy-btn" onclick="copyPrompt(this)">복사</button>
+    <div class="prompt-text">내게 맞는 진로 탐색을 하는 Web App을 만들고 싶습니다.</div>
+  </div>
+  <p class="intro">이때는 AI에게 아무 규칙도 주지 않습니다. 학생마다 받은 답을 2~3번 읽고, 옆 친구와 비교합니다.</p>
+  <div class="cards">
+    <div class="card"><div class="label">OBSERVE</div><h3>서로 다른 답이 나올 수 있다</h3><p>어떤 AI는 직업 추천부터 하고, 어떤 AI는 성격검사를 제안하고, 어떤 AI는 곧바로 기능이나 Coding 이야기를 시작할 수 있습니다.</p></div>
+    <div class="card"><div class="label">DO NOT FIX YET</div><h3>처음에는 바로 고치지 않는다</h3><p>“왜 내 생각과 다른 방향으로 갔지?”라는 느낌을 먼저 경험하는 것이 중요합니다.</p></div>
+  </div>
+</section>
+
+<section class="section" id="discover">
+  <div class="section-head"><span class="num">02</span><div><h2>발견 — AI가 틀린 걸까, 내가 덜 말한 걸까?</h2><p class="sub">COMPARE → THINK → DISCOVER</p></div></div>
+  <div class="pipeline">
+    <div class="pipe"><b>같은 한 문장</b><span>“진로 탐색 Web App을 만들고 싶다.”</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe"><b>서로 다른 AI 답</b><span>직업 추천, 검사, 기능 제안, Coding 등</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe"><b>교사의 질문</b><span>“우리가 AI에게 무엇까지 알려줬지?”</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe"><b>학생의 발견</b><span>“내 생각을 아직 충분히 설명하지 않았구나.”</span></div>
+  </div>
+  <div class="callout">
+    <strong>오늘의 핵심 질문:</strong><br>
+    “AI가 마음대로 정하지 않고, <strong>내가 하나씩 결정하도록</strong> 만들려면 AI에게 어떻게 말해야 할까?”
+  </div>
+</section>
+
+<section class="section" id="practice">
+  <div class="section-head"><span class="num">03</span><div><h2>Prompt 실습 — 규칙을 한 번에 하나씩만 추가한다</h2><p class="sub">BUILD THE PROMPT STEP BY STEP</p></div></div>
+  <p class="intro">처음부터 긴 Prompt를 주지 않습니다. 아래 규칙을 하나씩 추가하고, 매번 AI의 답이 어떻게 바뀌는지 확인합니다.</p>
+
+  <div class="ladder">
+    <div class="rung"><div class="n">STEP 1</div><div><strong>질문 하나만</strong><p>“지금은 만들지 말고, 내 생각을 더 분명하게 만들 수 있도록 <b>질문 하나만</b> 해주세요.”</p></div></div>
+    <div class="rung"><div class="n">STEP 2</div><div><strong>답하면 다음 질문 하나</strong><p>“내가 답하면 <b>다음 질문 하나만</b> 해주세요.”</p></div></div>
+    <div class="rung"><div class="n">STEP 3</div><div><strong>쉬운 말</strong><p>“질문은 <b>초등학생도 이해할 수 있는 쉬운 말</b>로 해주세요.”</p></div></div>
+    <div class="rung"><div class="n">STEP 4</div><div><strong>필요하면 짧은 예</strong><p>“내가 대답하기 어려울 때만 <b>간단한 예를 2~3개</b> 보여주세요.”</p></div></div>
+    <div class="rung"><div class="n">STEP 5</div><div><strong>질문 외에는 하지 않기</strong><p>“지금은 <b>설명, 추천, 요약, 기능 제안, Coding을 하지 말고 질문만</b> 해주세요.”</p></div></div>
+  </div>
+
+  <div class="callout">
+    <strong>실습 포인트:</strong> 규칙 하나를 추가할 때마다 AI의 답이 어떻게 달라지는지 비교합니다.
+    학생은 “Prompt가 길어서 좋아지는 것”이 아니라 <strong>원하는 대화 방법을 정확히 알려줘서 좋아진다</strong>는 것을 발견해야 합니다.
+  </div>
+</section>
+
+<section class="section" id="finalprompt">
+  <div class="section-head"><span class="num">04</span><div><h2>다시 시작할 때 사용할 최종 실습 Prompt</h2><p class="sub">ONE QUESTION AT A TIME</p></div></div>
+  <p class="intro">위 규칙을 직접 하나씩 경험한 뒤에만 아래 Prompt를 한 번에 사용합니다.</p>
+  <div class="prompt-card" id="mainPrompt">
+    <div class="step">학생용 최종 Prompt</div>
+    <button class="copy-btn" onclick="copyPrompt(this)">복사</button>
+    <div class="prompt-text">내게 맞는 진로 탐색을 하는 Web App을 만들고 싶습니다.
+
+지금은 Web App을 만들거나 방법을 설명하지 마세요.
+내가 무엇을 만들고 싶은지 스스로 정할 수 있도록 나에게 질문만 해주세요.
+
+규칙은 다음과 같습니다.
+
+1. 한 번에 질문은 정확히 하나만 해주세요.
+2. 내가 답하면 설명하거나 평가하지 말고 다음 질문 하나만 해주세요.
+3. 질문은 초등학생도 이해할 수 있는 쉬운 말로 해주세요.
+4. 내가 대답하기 어려울 때만 간단한 예를 2~3개 보여주세요.
+5. 내가 말하지 않은 내용을 AI가 대신 결정하지 마세요.
+6. 지금은 설명, 추천, 요약, 기능 목록, Coding을 하지 마세요.
+7. 내가 “이제 정리해줘”라고 말할 때까지 계속 질문만 해주세요.
+
+그럼 첫 번째 질문 하나만 해주세요.</div>
+  </div>
+  <p class="intro">
+    이 Prompt의 목적은 “정답을 잘 받는 것”이 아니라 <strong>AI가 학생보다 먼저 결정하지 못하게 하고, 학생이 한 가지씩 결정하도록 대화의 속도를 늦추는 것</strong>입니다.
+  </p>
+</section>
+
+<section class="section" id="dialogue">
+  <div class="section-head"><span class="num">05</span><div><h2>실제 대화는 이렇게 짧게 이어진다</h2><p class="sub">SHORT TURN-BY-TURN CONVERSATION</p></div></div>
+
+  <div class="dialogue">
+    <div class="bubble student"><div class="who">학생</div>내게 맞는 진로 탐색을 하는 Web App을 만들고 싶습니다. … 그럼 첫 번째 질문 하나만 해주세요.</div>
+    <div class="bubble ai"><div class="who">AI</div>이 App은 누가 사용하면 좋을까요?<br>예: 중학생 / 고등학생 / 누구나</div>
+    <div class="bubble student"><div class="who">학생</div>고등학생이 사용하면 좋겠어요.</div>
+    <div class="bubble ai"><div class="who">AI</div>이 App을 사용한 고등학생이 무엇을 알아가면 좋을까요?<br>예: 나에게 맞는 진로 / 관심 있는 분야 / 더 알아볼 직업</div>
+    <div class="bubble student"><div class="who">학생</div>나에게 맞는 진로를 조금 더 알아보고 싶어요.</div>
+    <div class="bubble ai"><div class="who">AI</div>그것을 알아보기 위해 학생이 App에 어떤 정보를 넣으면 좋을까요?<br>예: 좋아하는 과목 / 좋아하는 활동 / 관심 있는 분야</div>
+  </div>
+
+  <div class="callout">
+    AI가 중간에 “좋은 생각이에요”, “그럼 18문항을 만들겠습니다”, “React로 구현하겠습니다”라고 나가지 않는 것이 핵심입니다.
+    <strong>학생이 답하고 → AI가 다음 질문 하나만</strong> 하는 리듬을 유지합니다.
+  </div>
+</section>
+
+<section class="section" id="growth">
+  <div class="section-head"><span class="num">06</span><div><h2>한 문장이 조금씩 자라는 것을 마지막에 확인한다</h2><p class="sub">FROM VAGUE IDEA TO CLEAR INTENT</p></div></div>
+  <div class="pipeline">
+    <div class="pipe"><b>처음</b><span>진로 탐색 App을 만들고 싶다.</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe"><b>누가?</b><span>고등학생</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe"><b>무엇을?</b><span>나에게 맞는 진로를 더 알아본다.</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe"><b>어떤 정보?</b><span>다음 질문에서 하나씩 정한다.</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe"><b>다음은?</b><span>학생의 답에 따라 계속 구체화한다.</span></div>
+  </div>
+
+  <div class="card">
+    <div class="label">중요</div>
+    <h3>중간에는 매번 요약하지 않아도 된다</h3>
+    <p>
+      이번 실습의 목적은 한 번에 한 가지 생각에 집중하는 것입니다.
+      학생이 충분히 답한 뒤 <strong>“이제 정리해줘”</strong>라고 말하는 순간에만 AI에게 지금까지 결정한 내용을 정리하게 합니다.
+    </p>
+  </div>
+</section>
+
+<section class="section" id="compare">
+  <div class="section-head"><span class="num">07</span><div><h2>첫 번째 실험과 두 번째 실험을 비교한다</h2><p class="sub">SAME IDEA, DIFFERENT CONVERSATION RULES</p></div></div>
+  <table class="compare">
+    <thead><tr><th>첫 번째 — 한 문장만</th><th>두 번째 — 대화 방법 지정</th></tr></thead>
+    <tbody>
+      <tr><td>AI가 여러 방향으로 자유롭게 답할 수 있음</td><td><span class="good">질문 하나씩만 진행</span></td></tr>
+      <tr><td>AI가 학생보다 먼저 결정을 내릴 수 있음</td><td><span class="good">학생이 하나씩 결정</span></td></tr>
+      <tr><td>설명·추천·기능·Coding이 한꺼번에 나올 수 있음</td><td><span class="good">지금 필요한 질문에만 집중</span></td></tr>
+      <tr><td><span class="bad">“AI가 알아서 만들어 주는 것”처럼 보임</span></td><td><span class="good">“내가 방향을 정하고 AI가 돕는다”를 경험</span></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="section" id="takeaway">
+  <div class="section-head"><span class="num">08</span><div><h2>오늘 학생이 발견해야 할 것</h2><p class="sub">TAKEAWAY</p></div></div>
+  <ul class="check">
+    <li>처음부터 긴 Prompt를 잘 쓰지 못해도 괜찮다.</li>
+    <li>AI의 답이 마음에 들지 않으면 <strong>대답 방법부터 바꿔 달라고 말할 수 있다.</strong></li>
+    <li>“한 번에 하나만 질문해줘”도 훌륭한 Prompt다.</li>
+    <li>AI가 내 생각을 알아서 정하는 것이 아니라 <strong>내가 결정하고 AI는 질문으로 돕게 할 수 있다.</strong></li>
+    <li>충분히 생각이 정리된 뒤에야 “이제 정리해줘”라고 요청한다.</li>
+  </ul>
+
+  <div class="final-msg">
+    <p>“좋은 Prompt는 어려운 말을 많이 쓰는 것이 아니라,<br>내가 AI와 어떻게 대화하고 싶은지를 분명하게 알려주는 것이다.”</p>
+  </div>
+  <p class="intro">
+    다음 단계에서는 이 대화로 정리한 내용을 바탕으로 “어떤 정보까지 정해야 실제 Web App을 만들 수 있을까?”를 확인하고,
+    그 뒤에 필요한 조사와 요구사항 정리로 넘어갑니다.
+  </p>
+</section>
+
+<footer>Prompt 잘 만들기 · AI Vibe Coding Mini Lesson · Single-file HTML · 2026</footer>
+</div>
+</main>
+</div>
+
+<script>
+function copyPrompt(btn){
+  const text = btn.parentElement.querySelector('.prompt-text').innerText;
+  navigator.clipboard.writeText(text).then(()=>{
+    const old=btn.textContent; btn.textContent='복사됨';
+    setTimeout(()=>btn.textContent=old,1200);
+  }).catch(()=>{ alert('복사할 문장을 선택해 직접 복사해 주세요.'); });
+}
+(function(){
+  const links=[...document.querySelectorAll('#toc a')];
+  const targets=links.map(a=>document.querySelector(a.getAttribute('href'))).filter(Boolean);
+  const update=()=>{
+    let current=targets[0];
+    for(const el of targets){ if(el.getBoundingClientRect().top<=120) current=el; }
+    links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+current.id));
+  };
+  document.addEventListener('scroll',update,{passive:true}); update();
+})();
+</script>
+</body>
+</html>

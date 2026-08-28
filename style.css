@@ -110,6 +110,98 @@ body {
   font-weight: 500;
 }
 
+/* Hackathon Learning Navigation Bar */
+.hackathon-nav {
+  background: rgba(30, 41, 59, 0.8);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 8px 24px;
+  position: relative;
+  z-index: 99;
+}
+
+.hackathon-nav .nav-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.hackathon-nav .nav-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #94A3B8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.hackathon-nav .nav-links {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.hackathon-nav .nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #CBD5E1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+  min-height: 38px;
+}
+
+.hackathon-nav .nav-btn:hover {
+  color: #FFFFFF;
+  border-color: var(--accent-teal-light);
+  background: rgba(20, 184, 166, 0.15);
+  box-shadow: 0 0 8px rgba(20, 184, 166, 0.2);
+}
+
+/* Responsive Styles for Navigation Bar */
+@media (max-width: 768px) {
+  .hackathon-nav {
+    padding: 8px 16px;
+  }
+  
+  .hackathon-nav .nav-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .hackathon-nav .nav-links {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .hackathon-nav .nav-links::-webkit-scrollbar {
+    height: 4px;
+  }
+  
+  .hackathon-nav .nav-links::-webkit-scrollbar-track {
+    background: rgba(30, 41, 59, 0.2);
+  }
+  
+  .hackathon-nav .nav-links::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+  }
+}
+
 /* Main Container */
 .main-container {
   max-width: 1100px;

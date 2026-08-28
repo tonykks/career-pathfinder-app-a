@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>requirements.md 다음에는 무슨 일이 일어날까? — Multi-Agent Vibe Coding 수업</title>
+<style>
+:root{
+  --bg:#081018; --panel:#111b28; --panel2:#162235; --line:#24344a; --line2:#1a283a;
+  --ink:#eef4fb; --muted:#aab7c8; --dim:#73849a; --accent:#7c8cff; --accent2:#44d0bd;
+  --accent3:#f7b955; --ok:#65d58b; --danger:#ff7f7f; --radius:16px;
+  --sans:-apple-system,BlinkMacSystemFont,"Pretendard","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;
+  --mono:ui-monospace,"SFMono-Regular","JetBrains Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; color:var(--ink); font-family:var(--sans); line-height:1.72;
+  background:
+    radial-gradient(900px 600px at 85% -10%,rgba(124,140,255,.12),transparent 60%),
+    radial-gradient(800px 500px at 0 20%,rgba(68,208,189,.08),transparent 55%),var(--bg);
+}
+.layout{display:flex;max-width:1600px;margin:0 auto;align-items:flex-start}
+.side{
+  width:292px;flex:none;position:sticky;top:0;height:100vh;overflow:auto;
+  border-right:1px solid var(--line2);background:rgba(8,16,24,.96);padding:28px 18px 90px
+}
+.brand{font-size:17px;font-weight:850;line-height:1.35;letter-spacing:-.02em}
+.brand-sub{font:11px/1.5 var(--mono);color:var(--dim);letter-spacing:.05em;margin:7px 0 22px}
+.side nav a{display:block;text-decoration:none;color:var(--muted);font-size:13px;padding:7px 10px;border-radius:8px;border-left:2px solid transparent;margin:2px 0}
+.side nav a:hover{background:rgba(124,140,255,.10);color:var(--ink)}
+.side nav a.active{background:rgba(124,140,255,.14);color:#aeb7ff;border-left-color:var(--accent);font-weight:700}
+.side .tiny{margin-top:24px;padding-top:18px;border-top:1px solid var(--line2);font-size:11.5px;color:var(--dim)}
+.main{flex:1;min-width:0}
+.mobile-nav{display:none;position:sticky;top:0;z-index:20;background:rgba(8,16,24,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line2);padding:9px 12px;overflow-x:auto;gap:7px}
+.mobile-nav a{flex:0 0 auto;text-decoration:none;font:11.5px var(--mono);color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:6px 10px}
+.wrap{max-width:1060px;margin:0 auto;padding:0 36px 120px}
+.hero{padding:72px 0 42px;border-bottom:1px solid var(--line2)}
+.kicker{font:12px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--accent2);margin:0 0 14px}
+h1{font-size:clamp(31px,5vw,48px);line-height:1.18;margin:0 0 16px;letter-spacing:-.035em}
+.lede{font-size:17px;color:var(--muted);max-width:82ch;margin:0}
+.meta{display:flex;flex-wrap:wrap;gap:9px;margin-top:24px}
+.tag{font:11px var(--mono);color:var(--muted);padding:6px 11px;border:1px solid var(--line);border-radius:999px;background:rgba(17,27,40,.7)}
+.section{padding-top:64px;scroll-margin-top:24px}
+.section-head{display:flex;gap:14px;align-items:flex-start;margin-bottom:12px}
+.num{font:700 12px var(--mono);background:var(--accent);color:#0a1020;border-radius:8px;padding:5px 9px;margin-top:7px}
+h2{font-size:clamp(23px,3.5vw,31px);line-height:1.3;margin:0;letter-spacing:-.02em}
+h3{font-size:17px;margin:0 0 8px}
+.sub{font:11px var(--mono);color:var(--dim);letter-spacing:.08em;margin:4px 0 0}
+.intro{color:var(--muted);font-size:15.5px;max-width:82ch;margin:14px 0 24px}
+.callout{background:linear-gradient(135deg,rgba(124,140,255,.10),rgba(68,208,189,.06));border:1px solid rgba(124,140,255,.30);border-radius:var(--radius);padding:20px 22px;margin:22px 0}
+.statement{font-size:clamp(20px,3vw,27px);line-height:1.55;font-weight:800;letter-spacing:-.02em;margin:0}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.card{background:var(--panel);border:1px solid var(--line2);border-radius:var(--radius);padding:17px 18px}
+.card .label{font:10px var(--mono);letter-spacing:.12em;color:var(--accent3);margin-bottom:8px}
+.card p,.card li{color:var(--muted);font-size:14px}
+.card ul{margin:8px 0 0;padding-left:18px}
+.pipeline{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;margin:20px 0}
+.pipe{flex:1 1 140px;background:var(--panel);border:1px solid var(--line2);border-radius:12px;padding:14px;min-height:108px;position:relative}
+.pipe b{display:block;color:var(--ink);font-size:14px;margin-bottom:5px}
+.pipe span{display:block;color:var(--muted);font-size:12.8px}
+.pipe.current{border:1px solid var(--accent2);box-shadow:0 0 0 1px rgba(68,208,189,.15),0 0 28px rgba(68,208,189,.12);background:linear-gradient(180deg,rgba(68,208,189,.10),var(--panel))}
+.pipe.current:before{content:"현재 여기";position:absolute;right:10px;top:10px;font:700 9px var(--mono);color:#071713;background:var(--accent2);padding:4px 7px;border-radius:999px}
+.arrow{align-self:center;color:var(--dim);font:20px var(--mono)}
+.stagebox{border:1px solid var(--line);border-radius:16px;background:#0d1721;padding:18px;margin:18px 0}
+.stage-title{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:14px}
+.stage-title strong{font-size:17px}.status{font:700 10px var(--mono);padding:5px 8px;border-radius:999px;background:rgba(242,189,101,.1);border:1px solid rgba(242,189,101,.25);color:var(--accent3)}
+.agent-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.agent{border:1px solid var(--line2);background:var(--panel);border-radius:14px;padding:14px}
+.agent .name{font-size:14px;font-weight:850}.agent .role{font:10px var(--mono);color:var(--accent2);margin:4px 0 8px}.agent p{font-size:12.5px;color:var(--muted);margin:0}
+.loop{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:10px;align-items:center;margin:18px 0}
+.loop .box{background:var(--panel);border:1px solid var(--line2);border-radius:12px;padding:16px;text-align:center}
+.loop .box b{display:block;margin-bottom:5px}.loop .box span{font-size:12px;color:var(--muted)}
+.loop .a{color:var(--dim);font-size:22px}
+.compare{width:100%;border-collapse:collapse;margin:18px 0;font-size:13.5px}
+.compare th,.compare td{padding:12px;border-bottom:1px solid var(--line2);text-align:left;vertical-align:top}
+.compare th{font:11px var(--mono);letter-spacing:.08em;color:var(--dim)}
+.compare td{color:var(--muted)}
+.good{color:var(--ok);font-weight:750}.bad{color:var(--danger);font-weight:750}
+.dialogue{display:grid;gap:10px;margin:16px 0}
+.bubble{border-radius:14px;padding:14px 16px;max-width:90%}
+.human{background:rgba(68,208,189,.09);border:1px solid rgba(68,208,189,.24);margin-left:auto}
+.toby{background:rgba(124,140,255,.10);border:1px solid rgba(124,140,255,.25)}
+.geni{background:rgba(242,189,101,.08);border:1px solid rgba(242,189,101,.25)}
+.who{font:700 10px var(--mono);letter-spacing:.1em;margin-bottom:5px;color:var(--dim)}
+.check{margin:14px 0 0;padding-left:20px;color:var(--muted)}
+.check li{margin:7px 0}
+.final-msg{margin-top:26px;padding:24px;border-radius:16px;border:1px solid rgba(68,208,189,.3);background:rgba(68,208,189,.07)}
+.final-msg p{font-size:20px;font-weight:800;margin:0;line-height:1.6}
+footer{margin-top:72px;padding-top:24px;border-top:1px solid var(--line2);color:var(--dim);font:11px var(--mono);text-align:center}
+@media(max-width:1180px){.side{display:none}.mobile-nav{display:flex}.wrap{padding:0 22px 90px}}
+@media(max-width:820px){.agent-grid{grid-template-columns:1fr 1fr}.loop{grid-template-columns:1fr}.loop .a{transform:rotate(90deg);text-align:center}}
+@media(max-width:720px){.cards,.agent-grid{grid-template-columns:1fr}.hero{padding-top:44px}.wrap{padding-left:15px;padding-right:15px}.arrow{display:none}.bubble{max-width:96%}}
+@media print{
+ body{background:#fff;color:#111}.side,.mobile-nav{display:none!important}.wrap{max-width:none;padding:0 16mm 18mm}
+ .hero{padding-top:10mm}.card,.callout,.pipe,.stagebox,.agent,.loop .box,.bubble,.final-msg{background:#fff!important;border-color:#bbb!important}
+ p,li,.intro,.lede,.card p,.card li,.pipe span,.agent p,.compare td{color:#333!important}
+ h1,h2,h3,.statement,.final-msg p{color:#111!important}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside class="side">
+  <div class="brand">Agent Collaboration<br>Mini Lesson</div>
+  <div class="brand-sub">AI VIBE CODING · MULTI-AGENT WORKFLOW</div>
+  <nav id="toc">
+    <a href="#top">표지 · 지금 어디인가</a>
+    <a href="#flow">00 전체 흐름에서 현재 위치</a>
+    <a href="#inside">01 Agent 안에서는 무슨 일이?</a>
+    <a href="#research">02 Research와 Cross-check</a>
+    <a href="#human">03 학생은 무엇을 하나?</a>
+    <a href="#bridge">04 토비↔지니 연결이 필요한 이유</a>
+    <a href="#example">05 실제 예시로 이해하기</a>
+    <a href="#approval">06 왜 중간 승인점이 필요한가</a>
+    <a href="#finish">07 구현·Test·학생 최종 판단</a>
+  </nav>
+  <div class="tiny">한 페이지 HTML · 좌측 목차 / 우측 본문 · Responsive · 외부 Library 없음</div>
+</aside>
+
+<main class="main">
+<nav class="mobile-nav">
+  <a href="#flow">현재 위치</a><a href="#inside">Agent 내부</a><a href="#research">Research</a>
+  <a href="#human">학생 역할</a><a href="#bridge">토비↔지니</a><a href="#example">예시</a><a href="#finish">완성</a>
+</nav>
+
+<div class="wrap">
+<header class="hero" id="top">
+  <p class="kicker">AI VIBE CODING · MULTI-AGENT COLLABORATION</p>
+  <h1>requirements.md 다음에는<br>무슨 일이 일어날까?</h1>
+  <p class="lede">
+    앞 단계에서 학생의 아이디어를 AI와 대화하며 구체화해 <strong>1차 requirements.md</strong>를 만들었습니다.
+    이제부터는 학생이 직접 Coding하는 것이 아니라, <strong>지니가 Antigravity의 여러 Agent를 이용해 조사·검토·구현·Test를 관리</strong>합니다.
+    학생은 그 과정에서 <strong>토비와 지니 사이의 의도·승인·결과를 연결하는 사람</strong>이 됩니다.
+  </p>
+  <div class="meta">
+    <span class="tag">이전 단계 · Prompt → Intent → requirements.md</span>
+    <span class="tag">현재 단계 · Research / Cross-check</span>
+    <span class="tag">다음 단계 · Coding / QA / 통합</span>
+    <span class="tag">학생 역할 · 방향 결정 + 승인 + 최종 판단</span>
+  </div>
+</header>
+
+<section class="section" id="flow">
+  <div class="section-head"><span class="num">00</span><div><h2>전체 흐름에서 지금 어디까지 왔을까?</h2><p class="sub">WHERE ARE WE NOW?</p></div></div>
+  <p class="intro">학생이 처음 아이디어를 말한 뒤 requirements.md까지 왔고, 지금은 바로 Coding하는 단계가 아니라 <strong>Agent가 먼저 조사하고 검증하는 중간 구간</strong>에 있습니다.</p>
+
+  <div class="pipeline">
+    <div class="pipe"><b>학생 아이디어</b><span>“진로 탐색 Web App을 만들고 싶다.”</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe"><b>Gemini 대화</b><span>질문 하나씩 답하며 의도 구체화</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe"><b>requirements.md</b><span>구현 가능한 1차 요구사항</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe current"><b>지니 Agent</b><span>Research · Cross-check · 작업 계획</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe"><b>Agent 구현·Test</b><span>Coding · 독립 QA · 통합</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe"><b>학생 실행</b><span>“내가 원한 App인가?” 최종 확인</span></div>
+  </div>
+
+  <div class="callout">
+    <p class="statement">지금은 <strong>“App을 만드는 중”이 아니라,<br>App을 제대로 만들기 위해 AI 개발팀이 자료를 확인하고 역할을 나누는 중</strong>입니다.</p>
+  </div>
+</section>
+
+<section class="section" id="inside">
+  <div class="section-head"><span class="num">01</span><div><h2>지니 Agent 안에서는 실제로 어떤 일이 일어날까?</h2><p class="sub">INSIDE THE AGENT WORKFLOW</p></div></div>
+
+  <div class="stagebox">
+    <div class="stage-title">
+      <strong>현재 실제 진행 단계</strong>
+      <span class="status">RESEARCH & CROSS-CHECK</span>
+    </div>
+    <div class="agent-grid">
+      <div class="agent">
+        <div class="name">지니</div>
+        <div class="role">CTO · 총괄</div>
+        <p>requirements와 BRIEF를 읽고 작업을 나눕니다. 다른 AI 결과를 회수하고 최종적으로 통합합니다.</p>
+      </div>
+      <div class="agent">
+        <div class="name">Geni-Research</div>
+        <div class="role">RESEARCH / DEV</div>
+        <p>커리어넷·고용24·O*NET 같은 자료를 조사하고, 나중에는 구현 작업도 맡을 수 있습니다.</p>
+      </div>
+      <div class="agent">
+        <div class="name">애니</div>
+        <div class="role">INDEPENDENT REVIEWER</div>
+        <p>Geni-Research가 찾은 자료와 출처가 실제로 맞는지 독립적으로 다시 확인합니다.</p>
+      </div>
+      <div class="agent">
+        <div class="name">Geni-Dev</div>
+        <div class="role">SUBAGENT</div>
+        <p>필요할 때 조사·UI·구현 같은 보조 작업을 병렬로 수행합니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="loop">
+    <div class="box"><b>Geni-Research가 조사</b><span>공식 진로 자료와 Mapping 근거 수집</span></div>
+    <div class="a">→</div>
+    <div class="box"><b>애니가 Cross-check</b><span>출처가 실제인지, 과장한 해석은 없는지 확인</span></div>
+    <div class="a">→</div>
+    <div class="box"><b>지니가 통합</b><span>근거 있는 것과 구현 가정을 구분해 결정</span></div>
+  </div>
+
+  <div class="callout">
+    <strong>중요:</strong> 한 AI가 조사했다고 바로 믿지 않습니다.
+    <strong>다른 AI가 다시 확인</strong>하고, 그래도 근거가 없으면 “공식 사실”이 아니라 <strong>구현을 위한 가정</strong>이라고 표시합니다.
+  </div>
+</section>
+
+<section class="section" id="research">
+  <div class="section-head"><span class="num">02</span><div><h2>왜 Coding 전에 Research와 Cross-check를 할까?</h2><p class="sub">RESEARCH BEFORE CODING</p></div></div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="label">문제</div>
+      <h3>기능은 만들 수 있어도 내용이 틀릴 수 있다</h3>
+      <p>“수학을 좋아하면 공학 직업을 몇 점 더 준다” 같은 규칙은 Programming으로 쉽게 만들 수 있습니다. 하지만 그 규칙이 진로 교육에서 타당한지는 별도의 문제입니다.</p>
+    </div>
+    <div class="card">
+      <div class="label">해결</div>
+      <h3>먼저 자료를 찾아 근거를 확인한다</h3>
+      <p>공식 진로자료를 먼저 조사하고, 확인되지 않는 부분은 AI가 사실처럼 꾸미지 못하게 합니다. 그 다음에 Coding을 시작합니다.</p>
+    </div>
+  </div>
+
+  <table class="compare">
+    <thead><tr><th>바로 Coding하면</th><th>Research 후 Coding하면</th></tr></thead>
+    <tbody>
+      <tr><td>AI가 빈칸을 그럴듯하게 채울 수 있음</td><td><span class="good">공식 근거가 있는지 먼저 확인</span></td></tr>
+      <tr><td>잘 작동하지만 믿기 어려운 App이 될 수 있음</td><td><span class="good">근거와 가정을 구분한 App이 됨</span></td></tr>
+      <tr><td>오류 발견이 늦어짐</td><td><span class="good">Coding 전에 방향 오류를 줄임</span></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="section" id="human">
+  <div class="section-head"><span class="num">03</span><div><h2>그럼 학생은 무엇을 해야 할까?</h2><p class="sub">HUMAN ROLE IN VIBE CODING</p></div></div>
+
+  <div class="callout">
+    <p class="statement">학생은 Programmer가 아니라<br><strong>“내가 원하는 방향을 결정하고, AI의 결과를 승인하는 사람”</strong>입니다.</p>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="label">학생이 하지 않아도 되는 일</div>
+      <ul>
+        <li>HTML/CSS/JavaScript를 직접 전부 작성하기</li>
+        <li>모든 공식 사이트를 혼자 검색하기</li>
+        <li>모든 Bug를 직접 고치기</li>
+        <li>여러 AI의 작업 결과를 수동으로 합치기</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="label">학생이 반드시 해야 하는 일</div>
+      <ul>
+        <li>내가 무엇을 만들고 싶은지 말하기</li>
+        <li>AI가 이해한 내용이 맞는지 확인하기</li>
+        <li>중요한 변경을 승인하거나 거절하기</li>
+        <li>마지막 결과를 직접 써보고 판단하기</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="bridge">
+  <div class="section-head"><span class="num">04</span><div><h2>왜 학생이 토비와 지니를 연결해야 할까?</h2><p class="sub">WHY THE HUMAN BRIDGE MATTERS</p></div></div>
+
+  <p class="intro">
+    토비와 지니는 서로 맡은 일이 다릅니다. 토비는 학생과 대화하며 <strong>“무엇을 왜 만들고 싶은가”</strong>를 지키고,
+    지니는 실제 개발환경에서 <strong>“어떻게 만들고 검증할 것인가”</strong>를 관리합니다.
+    현재 구조에서는 두 AI가 학생의 의도를 완전히 자동으로 공유하는 것이 아니므로, 학생이 둘 사이의 중요한 정보를 연결해 줍니다.
+  </p>
+
+  <div class="pipeline">
+    <div class="pipe"><b>학생</b><span>“내가 원하는 것은 이것이야.”</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe"><b>토비</b><span>의도 정리 · BRIEF 검토 · 방향 확인</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe current"><b>학생</b><span>승인·수정 내용을 지니에게 전달</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe"><b>지니</b><span>Agent 배정 · Research · Coding · Test</span></div>
+  </div>
+
+  <div class="callout">
+    <strong>학생은 단순한 “복사·붙여넣기 담당”이 아닙니다.</strong><br>
+    실제 역할은 <strong>의도를 보존하는 최종 책임자</strong>입니다.
+    무엇을 전달할지, 무엇을 승인할지, 무엇을 다시 물어볼지를 결정하는 사람이기 때문입니다.
+  </div>
+</section>
+
+<section class="section" id="example">
+  <div class="section-head"><span class="num">05</span><div><h2>예시로 보면 왜 연결이 필요한지 더 쉽게 알 수 있다</h2><p class="sub">A SIMPLE CLASSROOM EXAMPLE</p></div></div>
+
+  <div class="dialogue">
+    <div class="bubble human"><div class="who">학생 → 토비</div>지니가 만든 BRIEF를 봤는데, 바로 Coding하려고 해요. 이대로 승인해도 될까요?</div>
+    <div class="bubble toby"><div class="who">토비</div>아직 Research 단계가 빠져 있어요. 진로 추천에 쓸 자료를 먼저 조사하고 다른 AI가 Cross-check한 뒤 Coding하도록 수정하는 것이 좋습니다.</div>
+    <div class="bubble human"><div class="who">학생 → 지니</div>BRIEF를 수정해 주세요. Coding 전에 공식 진로자료 Research와 독립 Cross-check 단계를 넣어 주세요. Research가 통합된 뒤에만 Coding을 시작하세요.</div>
+    <div class="bubble geni"><div class="who">지니</div>수정했습니다. Geni-Research가 Research하고, 애니가 독립 검토한 뒤 제가 통합하겠습니다. 그 전에는 Coding하지 않겠습니다.</div>
+  </div>
+
+  <div class="callout">
+    이 장면에서 학생은 Code를 한 줄도 쓰지 않았지만 <strong>Project의 품질을 크게 바꿨습니다.</strong>
+    만약 학생이 토비의 검토 없이 바로 “승인”했다면, 근거가 부족한 추천 규칙으로 App이 만들어질 수도 있었습니다.
+  </div>
+</section>
+
+<section class="section" id="approval">
+  <div class="section-head"><span class="num">06</span><div><h2>왜 중간중간 사람의 승인이 필요할까?</h2><p class="sub">HUMAN-IN-THE-LOOP</p></div></div>
+
+  <table class="compare">
+    <thead><tr><th>AI가 잘하는 것</th><th>사람이 맡아야 하는 것</th></tr></thead>
+    <tbody>
+      <tr><td>빠르게 조사하고 정리하기</td><td>그 방향이 내가 원하는 것인지 판단하기</td></tr>
+      <tr><td>기능을 만들고 Test하기</td><td>그 기능이 정말 필요한지 판단하기</td></tr>
+      <tr><td>여러 대안을 제안하기</td><td>어느 대안을 선택할지 결정하기</td></tr>
+      <tr><td>오류를 찾아 수정하기</td><td>완성 결과가 처음 목적과 맞는지 확인하기</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <strong>Human-in-the-loop(사람이 중요한 지점에서 확인하는 구조)</strong>란
+    AI가 모든 것을 끝까지 마음대로 결정하게 두는 것이 아니라,
+    <strong>목적이나 방향이 바뀔 수 있는 중요한 지점에서 사람이 확인하고 다시 진행시키는 방식</strong>입니다.
+  </div>
+</section>
+
+<section class="section" id="finish">
+  <div class="section-head"><span class="num">07</span><div><h2>Research가 끝나면 그다음은 구현·Test·학생 최종 판단</h2><p class="sub">IMPLEMENT → TEST → HUMAN ACCEPTANCE</p></div></div>
+
+  <div class="pipeline">
+    <div class="pipe"><b>Research 통합</b><span>근거·가정·Data 기준 확정</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe"><b>구현 Agent</b><span>Web App Coding</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe"><b>독립 QA</b><span>다른 AI가 기능·오류·요구사항 검토</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe"><b>지니 통합</b><span>수정사항 반영·최종 검증</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe current"><b>학생 실행</b><span>“내가 원했던 것과 같은가?”</span></div>
+  </div>
+
+  <ul class="check">
+    <li>App이 실행되는가?</li>
+    <li>버튼과 계산이 정상 작동하는가?</li>
+    <li>Research에서 확인한 내용이 올바르게 반영되었는가?</li>
+    <li>처음 내가 만들고 싶었던 App과 같은가?</li>
+    <li>다르다면 무엇을 바꾸고 싶은가?</li>
+  </ul>
+
+  <div class="final-msg">
+    <p>“Vibe Coding에서 사람의 가장 중요한 일은 Code를 직접 쓰는 것이 아니라,<br>AI가 올바른 방향으로 일하도록 연결하고 마지막에 목적과 결과가 같은지 판단하는 것이다.”</p>
+  </div>
+
+  <p class="intro">
+    다음 수업에서는 실제로 지니가 만든 App A를 실행해 보고,
+    “잘 작동하는가?”와 “처음 의도와 맞는가?”를 따로 평가한 뒤,
+    필요하면 App B의 requirements.md를 다시 설계하여 두 결과를 비교할 수 있습니다.
+  </p>
+</section>
+
+<footer>AI Vibe Coding Case Study · Multi-Agent Collaboration Lesson · Single-file HTML · 2026</footer>
+</div>
+</main>
+</div>
+
+<script>
+(function(){
+  const links=[...document.querySelectorAll('#toc a')];
+  const targets=links.map(a=>document.querySelector(a.getAttribute('href'))).filter(Boolean);
+  const update=()=>{
+    let current=targets[0];
+    for(const el of targets){ if(el.getBoundingClientRect().top<=120) current=el; }
+    links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+current.id));
+  };
+  document.addEventListener('scroll',update,{passive:true}); update();
+})();
+</script>
+</body>
+</html>

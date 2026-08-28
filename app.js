@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const sectionIntro = document.getElementById('section-intro');
   const sectionRating = document.getElementById('section-rating');
   const sectionResult = document.getElementById('section-result');
+  const hackathonNav = document.getElementById('hackathon-nav');
 
   const btnStart = document.getElementById('btn-start');
   const btnAnalyze = document.getElementById('btn-analyze');
@@ -417,6 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Navigation Logic
   btnStart.addEventListener('click', () => {
     switchSection(sectionIntro, sectionRating);
+    if (hackathonNav) hackathonNav.style.display = 'none';
     initStandardSubjects();
   });
 
@@ -424,6 +426,7 @@ document.addEventListener('DOMContentLoaded', () => {
     state.currentTopJobs = calculateTopJobs();
     renderResultCards(state.currentTopJobs);
     switchSection(sectionRating, sectionResult);
+    if (hackathonNav) hackathonNav.style.display = 'none';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
@@ -432,6 +435,7 @@ document.addEventListener('DOMContentLoaded', () => {
     switchSection(sectionResult, sectionRating);
     initStandardSubjects(); // Re-renders UI with preserved ratings
     renderCustomTags();     // Re-renders preserved custom tags
+    if (hackathonNav) hackathonNav.style.display = 'none';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
