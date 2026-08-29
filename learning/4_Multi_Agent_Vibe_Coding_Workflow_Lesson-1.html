@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 협업 Workflow — 지니·애니·토디와 파일로 이어지는 Vibe Coding</title>
+<style>
+:root{
+  --bg:#081018; --panel:#111b28; --panel2:#162235; --line:#24344a; --line2:#1a283a;
+  --ink:#eef4fb; --muted:#aab7c8; --dim:#73849a; --accent:#7c8cff; --accent2:#44d0bd;
+  --accent3:#f7b955; --ok:#65d58b; --danger:#ff7f7f; --radius:16px;
+  --sans:-apple-system,BlinkMacSystemFont,"Pretendard","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;
+  --mono:ui-monospace,"SFMono-Regular","JetBrains Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; color:var(--ink); font-family:var(--sans); line-height:1.72;
+  background:
+    radial-gradient(900px 600px at 85% -10%,rgba(124,140,255,.12),transparent 60%),
+    radial-gradient(800px 500px at 0 20%,rgba(68,208,189,.08),transparent 55%),var(--bg);
+}
+.layout{display:flex;max-width:1600px;margin:0 auto;align-items:flex-start}
+.side{
+  width:292px;flex:none;position:sticky;top:0;height:100vh;overflow:auto;
+  border-right:1px solid var(--line2);background:rgba(8,16,24,.96);padding:28px 18px 90px
+}
+.brand{font-size:17px;font-weight:850;line-height:1.35;letter-spacing:-.02em}
+.brand-sub{font:11px/1.5 var(--mono);color:var(--dim);letter-spacing:.05em;margin:7px 0 22px}
+.side nav a{display:block;text-decoration:none;color:var(--muted);font-size:13px;padding:7px 10px;border-radius:8px;border-left:2px solid transparent;margin:2px 0}
+.side nav a:hover{background:rgba(124,140,255,.10);color:var(--ink)}
+.side nav a.active{background:rgba(124,140,255,.14);color:#aeb7ff;border-left-color:var(--accent);font-weight:700}
+.side .tiny{margin-top:24px;padding-top:18px;border-top:1px solid var(--line2);font-size:11.5px;color:var(--dim)}
+.main{flex:1;min-width:0}
+.mobile-nav{display:none;position:sticky;top:0;z-index:20;background:rgba(8,16,24,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line2);padding:9px 12px;overflow-x:auto;gap:7px}
+.mobile-nav a{flex:0 0 auto;text-decoration:none;font:11.5px var(--mono);color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:6px 10px}
+.wrap{max-width:1060px;margin:0 auto;padding:0 36px 120px}
+.hero{padding:72px 0 42px;border-bottom:1px solid var(--line2)}
+.kicker{font:12px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--accent2);margin:0 0 14px}
+h1{font-size:clamp(31px,5vw,48px);line-height:1.18;margin:0 0 16px;letter-spacing:-.035em}
+.lede{font-size:17px;color:var(--muted);max-width:82ch;margin:0}
+.meta{display:flex;flex-wrap:wrap;gap:9px;margin-top:24px}
+.tag{font:11px var(--mono);color:var(--muted);padding:6px 11px;border:1px solid var(--line);border-radius:999px;background:rgba(17,27,40,.7)}
+.section{padding-top:64px;scroll-margin-top:24px}
+.section-head{display:flex;gap:14px;align-items:flex-start;margin-bottom:12px}
+.num{font:700 12px var(--mono);background:var(--accent);color:#0a1020;border-radius:8px;padding:5px 9px;margin-top:7px}
+h2{font-size:clamp(23px,3.5vw,31px);line-height:1.3;margin:0;letter-spacing:-.02em}
+h3{font-size:17px;margin:0 0 8px}
+.sub{font:11px var(--mono);color:var(--dim);letter-spacing:.08em;margin:4px 0 0}
+.intro{color:var(--muted);font-size:15.5px;max-width:82ch;margin:14px 0 24px}
+.callout{background:linear-gradient(135deg,rgba(124,140,255,.10),rgba(68,208,189,.06));border:1px solid rgba(124,140,255,.30);border-radius:var(--radius);padding:20px 22px;margin:22px 0}
+.warn{background:rgba(247,185,85,.07);border-color:rgba(247,185,85,.30)}
+.statement{font-size:clamp(20px,3vw,27px);line-height:1.55;font-weight:800;letter-spacing:-.02em;margin:0}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.card{background:var(--panel);border:1px solid var(--line2);border-radius:var(--radius);padding:17px 18px}
+.card .label{font:10px var(--mono);letter-spacing:.12em;color:var(--accent3);margin-bottom:8px}
+.card p,.card li{color:var(--muted);font-size:14px}
+.card ul{margin:8px 0 0;padding-left:18px}
+.pipeline{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;margin:20px 0}
+.pipe{flex:1 1 140px;background:var(--panel);border:1px solid var(--line2);border-radius:12px;padding:14px;min-height:108px;position:relative}
+.pipe b{display:block;color:var(--ink);font-size:14px;margin-bottom:5px}
+.pipe span{display:block;color:var(--muted);font-size:12.8px}
+.pipe.current{border:1px solid var(--accent2);box-shadow:0 0 0 1px rgba(68,208,189,.15),0 0 28px rgba(68,208,189,.12);background:linear-gradient(180deg,rgba(68,208,189,.10),var(--panel))}
+.pipe.current:before{content:"현재 여기";position:absolute;right:10px;top:10px;font:700 9px var(--mono);color:#071713;background:var(--accent2);padding:4px 7px;border-radius:999px}
+.arrow{align-self:center;color:var(--dim);font:20px var(--mono)}
+.stagebox{border:1px solid var(--line);border-radius:16px;background:#0d1721;padding:18px;margin:18px 0}
+.stage-title{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:14px}
+.stage-title strong{font-size:17px}.status{font:700 10px var(--mono);padding:5px 8px;border-radius:999px;background:rgba(242,189,101,.1);border:1px solid rgba(242,189,101,.25);color:var(--accent3)}
+.agent-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.agent{border:1px solid var(--line2);background:var(--panel);border-radius:14px;padding:14px}
+.agent .name{font-size:14px;font-weight:850}.agent .role{font:10px var(--mono);color:var(--accent2);margin:4px 0 8px}.agent p{font-size:12.5px;color:var(--muted);margin:0}
+.loop{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:10px;align-items:center;margin:18px 0}
+.loop .box{background:var(--panel);border:1px solid var(--line2);border-radius:12px;padding:16px;text-align:center}
+.loop .box b{display:block;margin-bottom:5px}.loop .box span{font-size:12px;color:var(--muted)}
+.loop .a{color:var(--dim);font-size:22px}
+.compare{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  margin:22px 0;
+  font-size:13.5px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  overflow:hidden;
+  background:rgba(17,27,40,.45);
+}
+.compare th,.compare td{
+  padding:16px 18px;
+  text-align:left;
+  vertical-align:top;
+  line-height:1.65;
+}
+.compare th{
+  font:11px var(--mono);
+  letter-spacing:.08em;
+  color:var(--dim);
+  background:rgba(22,34,53,.72);
+  border-bottom:1px solid var(--line);
+}
+.compare td{
+  color:var(--muted);
+  border-bottom:1px solid var(--line2);
+}
+.compare th+th,.compare td+td{border-left:1px solid var(--line2)}
+.compare tbody tr:last-child td{border-bottom:none}
+.compare tbody tr:hover td{background:rgba(124,140,255,.035)}
+.compare td:first-child{width:17%;font-weight:800;color:var(--ink)}
+.compare td:nth-child(2){width:41%}
+.compare td:nth-child(3){width:42%}
+.good{color:var(--ok);font-weight:750}.bad{color:var(--danger);font-weight:750}
+.dialogue{display:grid;gap:10px;margin:16px 0}
+.bubble{border-radius:14px;padding:14px 16px;max-width:90%}
+.human{background:rgba(68,208,189,.09);border:1px solid rgba(68,208,189,.24);margin-left:auto}
+.toby{background:rgba(124,140,255,.10);border:1px solid rgba(124,140,255,.25)}
+.geni{background:rgba(242,189,101,.08);border:1px solid rgba(242,189,101,.25)}
+.who{font:700 10px var(--mono);letter-spacing:.1em;margin-bottom:5px;color:var(--dim)}
+.check{margin:14px 0 0;padding-left:20px;color:var(--muted)}
+.check li{margin:7px 0}
+.final-msg{margin-top:26px;padding:24px;border-radius:16px;border:1px solid rgba(68,208,189,.3);background:rgba(68,208,189,.07)}
+.final-msg p{font-size:20px;font-weight:800;margin:0;line-height:1.6}
+footer{margin-top:72px;padding-top:24px;border-top:1px solid var(--line2);color:var(--dim);font:11px var(--mono);text-align:center}
+
+.handoff-table td:first-child{width:14%;white-space:nowrap}
+.handoff-table td:nth-child(2){width:43%}
+.handoff-table td:nth-child(3){width:43%}
+.checkpoint-table td:first-child{width:18%;white-space:normal}
+.checkpoint-table td:nth-child(2){width:41%}
+.checkpoint-table td:nth-child(3){width:41%}
+.role-share{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+  margin:22px 0;
+}
+.role-share .share{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:18px;
+  min-height:132px;
+}
+.role-share .pct{
+  font:800 26px var(--mono);
+  color:var(--accent2);
+  margin-bottom:6px;
+}
+.role-share .share:nth-child(2) .pct{color:var(--accent)}
+.role-share .share:nth-child(3) .pct{color:var(--accent3)}
+.role-share strong{display:block;font-size:15px;margin-bottom:6px}
+.role-share p{margin:0;color:var(--muted);font-size:13.5px}
+@media(max-width:760px){
+  .role-share{grid-template-columns:1fr}
+  .compare{font-size:12.8px}
+  .compare th,.compare td{padding:13px 12px}
+  .compare td:first-child{width:auto}
+}
+
+
+/* 긴 설명이 한쪽에 몰리지 않도록 폭과 정렬을 보완 */
+.intro.wide{
+  max-width:none;
+  width:100%;
+  text-align:center;
+  padding:0 22px;
+  margin:18px auto 28px;
+}
+.section-head + .intro.wide{margin-top:16px}
+
+/* 관계/역할을 한눈에 보는 시각화 */
+.role-visual{
+  margin:26px 0;
+  padding:22px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:linear-gradient(135deg,rgba(124,140,255,.07),rgba(68,208,189,.04));
+}
+.role-visual-title{
+  text-align:center;
+  margin-bottom:18px;
+}
+.role-visual-title h3{
+  font-size:20px;
+  margin:0 0 5px;
+}
+.role-visual-title p{
+  margin:0;
+  color:var(--muted);
+  font-size:13.5px;
+}
+.relation-list{
+  display:grid;
+  gap:12px;
+}
+.relation-row{
+  display:grid;
+  grid-template-columns:150px 1fr 105px;
+  align-items:center;
+  gap:14px;
+  padding:16px 18px;
+  border:1px solid var(--line2);
+  background:var(--panel);
+  border-radius:14px;
+}
+.relation-row .relation{
+  font-weight:850;
+  color:var(--ink);
+  text-align:center;
+  white-space:nowrap;
+}
+.relation-row .meaning strong{
+  display:block;
+  margin-bottom:3px;
+  font-size:15px;
+}
+.relation-row .meaning span{
+  display:block;
+  color:var(--muted);
+  font-size:13px;
+}
+.relation-row .weight{
+  text-align:center;
+  font:850 25px var(--mono);
+  color:var(--accent2);
+}
+.relation-row:nth-child(2) .weight{color:var(--accent)}
+.relation-row:nth-child(3) .weight{color:var(--accent3)}
+
+/* 지니가 맡는 일 시각화 */
+.geni-map{
+  display:grid;
+  grid-template-columns:1fr auto 1.1fr auto 1fr auto 1.1fr;
+  align-items:stretch;
+  gap:8px;
+  margin:22px 0;
+}
+.geni-map .gm{
+  min-height:118px;
+  padding:15px;
+  border:1px solid var(--line2);
+  border-radius:14px;
+  background:var(--panel);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  text-align:center;
+}
+.geni-map .gm b{
+  display:block;
+  margin-bottom:5px;
+  font-size:14px;
+}
+.geni-map .gm span{
+  color:var(--muted);
+  font-size:12.5px;
+}
+.geni-map .gm.geni-core{
+  border-color:rgba(68,208,189,.55);
+  background:linear-gradient(180deg,rgba(68,208,189,.10),var(--panel));
+}
+.geni-map .ga{
+  align-self:center;
+  color:var(--dim);
+  font:22px var(--mono);
+}
+
+/* 마지막 결론을 더 강하게 */
+.first-step{
+  margin-top:28px;
+  padding:26px;
+  border:1px solid rgba(101,213,139,.32);
+  border-radius:18px;
+  background:linear-gradient(135deg,rgba(101,213,139,.09),rgba(68,208,189,.05));
+  text-align:center;
+}
+.first-step .big{
+  font-size:clamp(21px,3vw,28px);
+  font-weight:900;
+  line-height:1.5;
+  margin:0 0 10px;
+}
+.first-step p{
+  margin:0 auto;
+  max-width:860px;
+  color:var(--muted);
+  font-size:14.5px;
+}
+.first-step strong{color:var(--ink)}
+
+@media(max-width:900px){
+  .relation-row{grid-template-columns:1fr; text-align:center}
+  .relation-row .meaning{text-align:center}
+  .geni-map{grid-template-columns:1fr}
+  .geni-map .ga{transform:rotate(90deg);text-align:center}
+}
+
+@media(max-width:1180px){.side{display:none}.mobile-nav{display:flex}.wrap{padding:0 22px 90px}}
+@media(max-width:820px){.agent-grid{grid-template-columns:1fr 1fr}.loop{grid-template-columns:1fr}.loop .a{transform:rotate(90deg);text-align:center}}
+@media(max-width:720px){.cards,.agent-grid{grid-template-columns:1fr}.hero{padding-top:44px}.wrap{padding-left:15px;padding-right:15px}.arrow{display:none}.bubble{max-width:96%}}
+@media print{
+ body{background:#fff;color:#111}.side,.mobile-nav{display:none!important}.wrap{max-width:none;padding:0 16mm 18mm}
+ .hero{padding-top:10mm}.card,.callout,.pipe,.stagebox,.agent,.loop .box,.bubble,.final-msg{background:#fff!important;border-color:#bbb!important}
+ p,li,.intro,.lede,.card p,.card li,.pipe span,.agent p,.compare td{color:#333!important}
+ h1,h2,h3,.statement,.final-msg p{color:#111!important}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside class="side">
+  <div class="brand">Agent Collaboration<br>Mini Lesson</div>
+  <div class="brand-sub">AI VIBE CODING · MULTI-AGENT WORKFLOW</div>
+  <nav id="toc">
+    <a href="#top">표지 · 지금 어디인가</a>
+    <a href="#flow">00 전체 협업 흐름에서 현재 위치</a>
+    <a href="#inside">01 Agent 안에서는 무슨 일이?</a>
+    <a href="#research">02 Research와 Cross-check</a>
+    <a href="#human">03 학생은 무엇을 하나?</a>
+    <a href="#bridge">04 토비↔지니 연결이 필요한 이유</a>
+    <a href="#example">05 실제 예시로 이해하기</a>
+    <a href="#approval">06 왜 중간 승인점이 필요한가</a>
+    <a href="#finish">07 구현·Test·학생 최종 판단</a>
+  </nav>
+  <div class="tiny">한 페이지 HTML · 좌측 목차 / 우측 본문 · Responsive · 외부 Library 없음</div>
+</aside>
+
+<main class="main">
+<nav class="mobile-nav">
+  <a href="#flow">현재 위치</a><a href="#inside">Agent 내부</a><a href="#research">Research</a>
+  <a href="#human">학생 역할</a><a href="#bridge">토비↔지니</a><a href="#example">예시</a><a href="#finish">완성</a>
+</nav>
+
+<div class="wrap">
+<header class="hero" id="top">
+  <p class="kicker">AI VIBE CODING · FILE-BASED MULTI-AI COLLABORATION</p>
+  <h1>requirements.md 다음에는<br>AI들이 어떻게 협업할까?</h1>
+  <p class="lede">
+    학생이 Gemini와 대화해 <strong>requirements.md</strong>를 확정하면, 이제 구현은
+    <strong>지니(Antigravity IDE Agent)</strong>가 총괄합니다.
+    지니는 Terminal에서 <strong>애니(Antigravity CLI)</strong>와 <strong>토디(Codex CLI)</strong>를 명령으로 호출하고,
+    작업 지시와 실행 결과를 <strong>공유 파일(.md)</strong>에 남겨 문맥을 이어 갑니다.
+    학생은 마지막에 <strong>토비(생성형 AI · Gemini)</strong>와 지니 사이를 복사·붙여넣기로 연결해
+    “처음 의도와 실제 구현이 같은가?”를 검토합니다.
+  </p>
+  <div class="meta">
+    <span class="tag">토비 · 생성형 AI (Gemini)</span>
+    <span class="tag">지니 · Antigravity IDE Agent</span>
+    <span class="tag">애니 · Antigravity CLI</span>
+    <span class="tag">토디 · Codex CLI</span>
+    <span class="tag">핵심 · Terminal + Markdown Handoff</span>
+  </div>
+</header>
+
+<section class="section" id="flow">
+  <div class="section-head"><span class="num">00</span><div><h2>전체 협업 흐름 — 학생은 방향을 정하고, AI 팀은 파일로 이어서 일한다</h2><p class="sub">WHERE ARE WE NOW?</p></div></div>
+  <p class="intro">
+    핵심은 “AI 여러 개를 동시에 켜 둔다”가 아닙니다.
+    <strong>지니가 총괄하고 → CLI 작업자에게 명령하고 → 결과를 파일로 받고 → 직접 검증하고 → 다시 수정시키는 반복 구조</strong>입니다.
+    파일에 지시와 결과를 남기기 때문에 CLI 실행이 끝나도 다음 작업에서 앞 문맥을 다시 읽어 이어갈 수 있습니다.
+  </p>
+
+  <div class="pipeline">
+    <div class="pipe"><b>학생 ↔ 토비</b><span>아이디어·의도 구체화</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe"><b>requirements.md</b><span>무엇을 만들지(WHAT) 확정</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe"><b>지니</b><span>Research · BRIEF · 업무 분장</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe"><b>토디 ↔ 애니</b><span>Coding · Review · Test 반복</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe"><b>지니 직접 검증</b><span>파일·Test·실행 결과 확인</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe"><b>지니 ↔ 학생 ↔ 토비</b><span>학생이 두 AI를 연결 · 의도 검토 · 수정 · PASS</span></div>
+  </div>
+
+  <div class="callout">
+    <strong>한 문장으로:</strong><br>
+    학생은 <strong>WHAT</strong>을 결정하고, 지니는 <strong>HOW</strong>를 총괄하며,
+    토디와 애니는 Terminal에서 실제 작업을 수행하고, <strong>.md 파일이 AI들 사이의 작업 기억과 전달문서</strong>가 됩니다.
+  </div>
+</section>
+
+<section class="section" id="inside">
+  <div class="section-head"><span class="num">01</span><div><h2>먼저 이름부터 정확히 — 이 수업에서는 네 역할만 구분한다</h2><p class="sub">FOUR CLEAR ROLES · NO  TERMINOLOGY</p></div></div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="label">TOBY · 생성형 AI</div>
+      <h3>토비 = Gemini</h3>
+      <p>학생과 대화하며 아이디어를 구체화하고, requirements.md를 만들도록 돕고, 마지막에는 지니의 구현 결과가 학생의 원래 의도를 충족하는지 검토합니다.</p>
+    </div>
+    <div class="card">
+      <div class="label">GENI · 총괄</div>
+      <h3>지니 = Antigravity IDE Agent</h3>
+      <p>requirements.md와 BRIEF.md를 읽고 전체 작업을 설계합니다. Terminal에서 애니·토디에게 명령을 내리고 결과 파일을 회수하며, 수정된 파일과 Test 결과를 직접 확인해 다시 보완시킵니다.</p>
+    </div>
+    <div class="card">
+      <div class="label">ANNY · 독립 검토</div>
+      <h3>애니 = Antigravity CLI</h3>
+      <p>Terminal에서 호출되는 독립 CLI 작업자입니다. 지니가 지정한 파일과 구현 결과를 읽고, 요구사항 누락·오류·Regression을 검토하고 Test한 뒤 결과를 .md 파일에 기록합니다.</p>
+    </div>
+    <div class="card">
+      <div class="label">TODY · 구현</div>
+      <h3>토디 = Codex CLI</h3>
+      <p>Terminal에서 호출되는 Coding 작업자입니다. 지니의 작업 지시 파일을 읽고 코드를 구현·수정하며, 무엇을 바꿨고 어떤 Test를 했는지 결과 파일에 기록합니다.</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>이번 자료에서는 네 역할만 구분합니다.</strong><br>
+    학생은 복잡한 Agent 계층을 외울 필요 없이
+    <strong>토비(대화·의도) / 지니(총괄) / 토디(Coding) / 애니(독립 검토·Test)</strong>
+    네 역할만 이해하면 됩니다.
+  </div>
+</section>
+
+<section class="section" id="research">
+  <div class="section-head"><span class="num">02</span><div><h2>BRIEF PASS가 출발 신호 — 그다음 Terminal과 파일로 협업한다</h2><p class="sub">BRIEF APPROVAL → TERMINAL COMMAND → TASK FILE → RESULT FILE</p></div></div>
+
+  <p class="intro">
+    지니가 requirements.md를 읽고 Deep Research를 수행해 <strong>“어떻게 구현할 것인가(HOW)”를 BRIEF.md</strong>로 정리하면,
+    학생은 그 내용을 토비에게 전달해 원래 요구사항을 빠짐없이 충족하는지 검토받습니다.
+    토비의 피드백을 다시 지니에게 전달하고, <strong>토비가 PASS할 때까지 지니가 BRIEF.md를 수정</strong>합니다.
+    이 승인 전에는 본격 Coding으로 넘어가지 않는 것이 이 수업의 원칙입니다.
+  </p>
+
+  <div class="pipeline">
+    <div class="pipe"><b>requirements.md</b><span>학생이 정한 WHAT</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe"><b>지니 Research</b><span>근거·사례·구현 방법 조사</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe"><b>BRIEF.md</b><span>지니가 정리한 HOW</span></div>
+    <div class="arrow">↔</div>
+    <div class="pipe"><b>토비 검토 · 지니 수정</b><span>요구사항 충족까지 반복</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe current"><b>PASS</b><span>이제 CLI 작업 시작</span></div>
+  </div>
+
+  <div class="callout">
+    <strong>환경 준비는 이렇게 이해하면 충분합니다.</strong><br>
+    이 수업에서는 Terminal에 <strong>Codex CLI(토디)</strong>와 <strong>Antigravity CLI(애니)</strong>가 설치·로그인되어 있다고 가정합니다.
+    학생이 설치 명령을 모두 외우는 것이 목표가 아니라,
+    <strong>지니가 Terminal 명령으로 두 CLI 작업자를 호출한다</strong>는 구조를 이해하는 것이 목표입니다.
+  </div>
+
+  <p class="intro">
+    애니와 토디는 IDE 안의 채팅창에서 계속 대화하는 방식이 아니라,
+    <strong>컴퓨터의 Terminal에 설치된 CLI를 지니가 명령어로 실행</strong>하는 방식으로 사용합니다.
+    한 번의 CLI 실행이 끝난 뒤에도 앞의 작업 문맥을 잃지 않도록,
+    지니는 지시사항을 Markdown 파일에 쓰고 CLI는 실행 결과를 다시 Markdown 파일에 남깁니다.
+  </p>
+
+  <div class="cards">
+    <div class="card">
+      <div class="label">① 지니 → 토디</div>
+      <h3>Coding 작업 지시</h3>
+      <p>예: 지니가 <code>tody-task.md</code>에 수정 대상, 완료조건, 금지사항을 기록한 뒤 Terminal에서 <code>codex exec ...</code> 형태로 토디에게 그 파일을 읽고 작업하도록 지시합니다.</p>
+    </div>
+    <div class="card">
+      <div class="label">② 토디 → 지니</div>
+      <h3>구현 결과 기록</h3>
+      <p>토디는 코드를 수정한 뒤 <code>tody-result.md</code>에 변경 파일, 구현 내용, 실행한 Test, 남은 문제를 기록합니다. 지니는 이 파일을 읽고 실제 변경 파일도 직접 확인합니다.</p>
+    </div>
+    <div class="card">
+      <div class="label">③ 지니 → 애니</div>
+      <h3>독립 Review · Test 지시</h3>
+      <p>지니가 <code>any-task.md</code>에 검토 범위와 PASS 기준을 적고, Terminal에서 <code>agy --print ...</code> 같은 명령으로 애니에게 독립 검증을 요청합니다.</p>
+    </div>
+    <div class="card">
+      <div class="label">④ 애니 → 지니</div>
+      <h3>QA 결과 기록</h3>
+      <p>애니는 요구사항 누락, 오류, Regression, Test 결과를 <code>any-result.md</code>에 남깁니다. FAIL이면 지니가 다시 토디에게 수정 지시를 만들고 같은 Loop를 반복합니다.</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>왜 굳이 파일에 남길까?</strong><br>
+    CLI를 여러 번 독립 실행하면 매번 이전 대화 전체를 자동으로 기억한다고 가정할 수 없습니다.
+    그래서 <strong>작업 지시와 실행 결과를 파일로 남겨 “공유 기억”처럼 사용</strong>합니다.
+    다음 AI는 그 파일을 읽고 앞 작업의 문맥을 이어서 일할 수 있고,
+    사람도 나중에 무엇을 지시했고 무엇이 바뀌었는지 확인할 수 있습니다.
+    <br><span class="mini-note">※ 위 파일명과 명령 형식은 수업 이해를 위한 예시이며 프로젝트 환경에 따라 달라질 수 있습니다.</span>
+  </div>
+</section>
+
+<section class="section" id="human">
+  <div class="section-head"><span class="num">03</span><div><h2>Coding과 검토는 이렇게 반복된다 — 토디가 만들고, 애니가 따로 확인한다</h2><p class="sub">IMPLEMENT → REVIEW → FIX LOOP</p></div></div>
+  <p class="intro">
+    토디가 한 번 코딩했다고 끝나는 것이 아닙니다.
+    <strong>토디 구현 → 애니 독립 검토·Test → 지니 확인 → 수정 지시 → 다시 구현·검토</strong>를 반복해
+    요구사항과 완료조건을 모두 만족할 때까지 품질을 높입니다.
+  </p>
+
+  <div class="pipeline">
+    <div class="pipe"><b>지니</b><span>작업 지시 파일 작성</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe"><b>토디</b><span>Coding · 수정 · 결과 기록</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe"><b>애니</b><span>독립 Review · Test · 결과 기록</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe"><b>지니</b><span>결과 파일 + 실제 코드 확인</span></div>
+    <div class="arrow">↺</div>
+    <div class="pipe"><b>FAIL이면 반복</b><span>수정 지시 → 재구현 → 재검증</span></div>
+  </div>
+
+  <table class="compare handoff-table">
+    <thead><tr><th>역할</th><th>남기는 기록</th><th>다음 작업자가 확인하는 것</th></tr></thead>
+    <tbody>
+      <tr><td><strong>지니</strong></td><td>작업 목적 · 수정 범위 · 완료조건 · 금지사항</td><td>토디와 애니가 무엇을 해야 하는지</td></tr>
+      <tr><td><strong>토디</strong></td><td>변경 파일 · Coding 내용 · Test 결과 · 남은 문제</td><td>지니가 실제 구현이 지시와 맞는지</td></tr>
+      <tr><td><strong>애니</strong></td><td>PASS/FAIL · 발견 오류 · 누락 요구사항 · Regression 결과</td><td>지니가 어떤 보완이 필요한지</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="section" id="bridge">
+  <div class="section-head"><span class="num">04</span><div><h2>지니는 결과 보고만 믿지 않는다 — 수정된 파일을 직접 다시 확인한다</h2><p class="sub">ORCHESTRATOR VERIFICATION</p></div></div>
+  <p class="intro">
+    토디가 “완료했습니다”, 애니가 “PASS입니다”라고 기록했다고 해서 지니가 그대로 끝내는 것은 아닙니다.
+    <strong>지니는 결과 파일을 읽고, 실제로 수정된 파일을 하나씩 열어 변경 내용을 확인하고,
+    Test 결과와 실행 화면이 요구사항을 만족하는지 다시 검증</strong>합니다.
+  </p>
+
+  <div class="cards">
+    <div class="card">
+      <div class="label">CHECK 1</div>
+      <h3>결과 파일과 실제 Code가 같은가?</h3>
+      <p>토디가 기록한 변경 파일 목록과 실제 diff를 비교하고, 요청하지 않은 범위까지 바뀌지는 않았는지 확인합니다.</p>
+    </div>
+    <div class="card">
+      <div class="label">CHECK 2</div>
+      <h3>Test가 정말 완료조건을 검증했는가?</h3>
+      <p>애니의 PASS 문구만 보는 것이 아니라 어떤 Test를 했고, 요구사항의 핵심 기능과 기존 기능 Regression까지 확인했는지 살펴봅니다.</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>지니의 역할은 “전달자”가 아니라 총괄 검증자입니다.</strong><br>
+    부족한 점이 발견되면 지니가 새 수정 지시 파일을 만들고 토디·애니에게 다시 작업시킵니다.
+    이 과정을 거쳐 <strong>“CLI 작업 완료”가 아니라 “지니 검증 완료”</strong> 상태가 되어야 다음 단계로 넘어갑니다.
+  </div>
+</section>
+
+<section class="section" id="example">
+  <div class="section-head"><span class="num">05</span><div><h2>마지막에는 다시 토비가 검토한다 — 학생이 토비와 지니를 연결한다</h2><p class="sub">STUDENT AS THE HUMAN BRIDGE</p></div></div>
+  <p class="intro wide">
+    지니가 기술적으로 구현과 Test를 완료해도 마지막 질문이 남습니다.
+    <strong>“이 결과가 처음 학생이 만들고 싶었던 것과 같은가?”</strong>입니다.
+    이 검토는 학생과 처음부터 의도를 구체화했던 토비가 맡습니다.
+    현재 수업에서는 토비와 지니가 자동으로 직접 대화하는 것이 아니라,
+    <strong>학생이 필요한 내용을 복사·붙여넣기하여 둘을 연결</strong>합니다.
+  </p>
+
+  <div class="dialogue">
+    <div class="bubble student"><div class="who">학생 → 지니</div>지금까지 구현·검토한 결과를 정리해서 토비가 검토할 수 있는 완료 보고로 만들어 주세요.</div>
+    <div class="bubble ai"><div class="who">지니</div>구현 파일, Test 결과, 남은 이슈와 요구사항 충족 여부를 정리해 완료 보고 파일에 기록했습니다.</div>
+    <div class="bubble student"><div class="who">학생 → 토비</div>지니의 완료 보고를 복사해 왔어요. 처음 확정한 requirements.md와 비교해서 의도가 정확히 구현되었는지 검토해 주세요.</div>
+    <div class="bubble ai"><div class="who">토비</div>요구사항과 비교해 누락·과도한 구현·수정 필요사항을 정리합니다. 모두 충족하면 PASS를 알립니다.</div>
+    <div class="bubble student"><div class="who">학생 → 지니</div>토비의 피드백을 그대로 전달할게요. 필요한 부분만 수정하고 다시 검증해 주세요.</div>
+  </div>
+
+  <div class="final-msg">
+    <p>학생의 복사·붙여넣기는 단순 전달 작업이 아니라,<br><strong>“의도 검토 AI(토비)”와 “개발 총괄 AI(지니)”를 연결하는 Human-in-the-loop</strong> 역할입니다.</p>
+  </div>
+</section>
+
+<section class="section" id="approval">
+  <div class="section-head"><span class="num">06</span><div><h2>학생은 어디에서 개입할까? — 중요한 지점만 복사·붙여넣기로 연결한다</h2><p class="sub">HUMAN-IN-THE-LOOP CHECKPOINTS</p></div></div>
+
+  <table class="compare checkpoint-table">
+    <thead><tr><th>시점</th><th>학생이 하는 일</th><th>AI가 하는 일</th></tr></thead>
+    <tbody>
+      <tr><td><strong>① 요구사항</strong></td><td>토비와 대화하며 만들고 싶은 것을 확정한다.</td><td>토비가 requirements.md로 정리한다.</td></tr>
+      <tr><td><strong>② 구현 설계</strong></td><td>지니의 BRIEF.md를 토비에게 전달해 검토받고 피드백을 다시 지니에게 전달한다.</td><td>지니가 Research와 BRIEF를 수정해 HOW를 확정한다.</td></tr>
+      <tr><td><strong>③ 개발 중</strong></td><td>저수준 Coding 과정에는 매번 개입하지 않고 중요한 변경만 확인한다.</td><td>지니가 Terminal로 토디·애니를 호출해 구현·검토·Test를 반복한다.</td></tr>
+      <tr><td><strong>④ 완료 검토</strong></td><td>지니의 완료 보고를 토비에게 전달하고 피드백을 다시 지니에게 전달한다.</td><td>토비가 의도를 검토하고 지니가 필요한 수정을 반영한다.</td></tr>
+      <tr><td><strong>⑤ 최종 판단</strong></td><td>학생이 직접 실행해 “내가 원한 결과인가?”를 판단한다.</td><td>PASS된 결과를 배포할 준비를 한다.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <strong>중요:</strong> 학생은 모든 Terminal 명령과 Code를 이해할 필요가 없습니다.
+    대신 <strong>“누가 무엇을 맡고, 어떤 파일로 결과를 전달하며, 언제 내가 판단해야 하는가”</strong>를 이해하면 됩니다.
+    첫 번째 Vibe Coding 입문에서는 이 역할 분담을 목표로 정하고,
+    <strong>같은 Workflow를 여러 번 반복해 자연스럽게 체화하는 것</strong>이 중요합니다.
+  </div>
+</section>
+
+<section class="section" id="finish">
+  <div class="section-head"><span class="num">07</span><div><h2>최종 Workflow — 말로 시작한 아이디어가 파일과 검증 Loop를 거쳐 App이 된다</h2><p class="sub">INTENT → FILE HANDOFF → CLI WORK → REVIEW → HUMAN ACCEPTANCE</p></div></div>
+
+  <div class="pipeline">
+    <div class="pipe"><b>학생 ↔ 토비</b><span>의도 구체화</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe"><b>requirements.md</b><span>WHAT 문서화</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe"><b>지니</b><span>Research · BRIEF · 업무 분장</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe"><b>Terminal</b><span>codex exec / agy --print 등</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe"><b>토디 · 애니</b><span>Coding ↔ Review/Test</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe"><b>.md 결과 파일</b><span>지시·실행결과·PASS/FAIL 기록</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe"><b>지니 직접 검증</b><span>필요하면 다시 수정 Loop</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe"><b>학생 ↔ 토비</b><span>의도 최종 검토</span></div>
+    <div class="arrow">→</div>
+    <div class="pipe"><b>학생 실행</b><span>최종 확인 · 배포 판단</span></div>
+  </div>
+
+  <ul class="check">
+    <li><strong>토비:</strong> 학생의 의도와 최종 결과가 일치하는지 지킨다.</li>
+    <li><strong>지니:</strong> 전체 개발을 계획하고 CLI 작업을 지휘하며 실제 파일과 Test 결과를 직접 검증한다.</li>
+    <li><strong>토디:</strong> 지시 파일을 읽고 Coding·수정한 뒤 결과를 파일에 남긴다.</li>
+    <li><strong>애니:</strong> 독립적으로 검토·Test하고 PASS/FAIL과 근거를 파일에 남긴다.</li>
+    <li><strong>학생:</strong> 토비와 요구사항을 확정하고, 지니와 토비 사이의 통로가 되며, 마지막 결과가 자신의 목적과 같은지 직접 실행해 최종 판단한다.</li>
+  </ul>
+
+  <div class="callout warn">
+    <strong>왜 “최종 검수 40%”가 중요한가? — 실제 App A 사례</strong><br>
+    App A에는 직업 Data가 15개 있었고 자동 Test도 통과했지만,
+    학생이 실제로 여러 번 실행해 보니 <strong>비슷한 직업만 반복해서 나오는 이상함</strong>이 발견되었습니다.
+    확인 결과 같은 진로 Domain에서 사실상 첫 번째 직업만 선택되는 구조여서
+    15개 Data가 있어도 실제 결과 후보는 훨씬 적었습니다.
+    이 문제는 <strong>학생의 반복 사용 → 토비 검토 → 지니 수정 → 토디 구현 → 애니 재Test</strong>를 거쳐
+    모든 직업이 실제 결과로 도달 가능한지 다시 검증하는 방식으로 보완했습니다.
+    <br><br>
+    즉, <strong>자동 QA가 PASS해도 “내가 직접 써 보니 이상하다”는 학생의 감각이 마지막 품질검사의 중요한 Sensor</strong>가 될 수 있습니다.
+  </div>
+
+  <div class="role-visual">
+    <div class="role-visual-title">
+      <h3>지니의 역할은 “코딩하는 사람”보다 “AI 개발팀장”에 가깝다</h3>
+      <p>학생이 HOW를 직접 알지 못해도 지니가 아래 과정을 총괄합니다.</p>
+    </div>
+
+    <div class="geni-map">
+      <div class="gm">
+        <b>requirements.md</b>
+        <span>학생이 확정한 WHAT</span>
+      </div>
+      <div class="ga">→</div>
+      <div class="gm geni-core">
+        <b>지니</b>
+        <span>Research · BRIEF · 업무 분장 · 수정 지시</span>
+      </div>
+      <div class="ga">→</div>
+      <div class="gm">
+        <b>토디 · 애니</b>
+        <span>Coding · Review · Test · 결과 기록</span>
+      </div>
+      <div class="ga">→</div>
+      <div class="gm geni-core">
+        <b>지니 직접 검증</b>
+        <span>실제 파일 · Test · 실행 결과 확인 후 재작업 또는 완료</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="role-visual">
+    <div class="role-visual-title">
+      <h3>학생의 역할을 관계로 보면 더 쉽다</h3>
+      <p>Vibe Coding 첫걸음에서 학생이 집중할 세 가지 역할</p>
+    </div>
+
+    <div class="relation-list">
+      <div class="relation-row">
+        <div class="relation">학생 ↔ 토비</div>
+        <div class="meaning">
+          <strong>구체적인 요구사항 확정</strong>
+          <span>질문과 답변을 반복하며 “무엇을 만들 것인가”를 학생 스스로 결정합니다.</span>
+        </div>
+        <div class="weight">50%</div>
+      </div>
+
+      <div class="relation-row">
+        <div class="relation">토비 ↔ 학생</div>
+        <div class="meaning">
+          <strong>최종 검수 · 수정 · 완성 확정</strong>
+          <span>완성된 App을 직접 사용하고, 처음 의도와 같은지 토비와 검토해 최종적으로 학생이 완성을 결정합니다.</span>
+        </div>
+        <div class="weight">40%</div>
+      </div>
+
+      <div class="relation-row">
+        <div class="relation">지니 ↔ 학생 ↔ 토비</div>
+        <div class="meaning">
+          <strong>두 AI 사이의 통로 역할</strong>
+          <span>BRIEF와 완료 보고, 피드백을 복사·붙여넣기로 전달해 개발 의도가 끊기지 않도록 연결합니다.</span>
+        </div>
+        <div class="weight">10%</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="role-share">
+    <div class="share">
+      <div class="pct">50%</div>
+      <strong>구체적인 요구사항 확정</strong>
+      <p>학생이 토비와 충분히 대화하면서 무엇을 만들 것인지 결정하고, 핵심 요구를 빠짐없이 확정합니다.</p>
+    </div>
+    <div class="share">
+      <div class="pct">40%</div>
+      <strong>최종 검수 및 확정</strong>
+      <p>완성된 App을 학생이 직접 실행해 보고, 처음 의도와 같은지 확인하고 수정 여부를 최종 판단합니다.</p>
+    </div>
+    <div class="share">
+      <div class="pct">10%</div>
+      <strong>토비 ↔ 지니 연결 역할</strong>
+      <p>BRIEF 검토와 완료 검토에서 필요한 내용을 복사·붙여넣기로 전달해 두 AI가 같은 의도를 유지하도록 연결합니다.</p>
+    </div>
+  </div>
+
+  <div class="final-msg">
+    <p>“Vibe Coding 첫걸음에서 학생의 핵심 역할은 Coding이 아닙니다.<br>
+    <strong>학생 ↔ 토비로 요구사항을 확정하고(50%) → 토비 ↔ 학생으로 결과를 검수·완성하며(40%) → 지니 ↔ 학생 ↔ 토비의 통로가 되는 것(10%)</strong>입니다.”</p>
+  </div>
+
+  <div class="first-step">
+    <p class="big">이 세 가지 역할을 이해하면 <strong>Vibe Coding의 첫걸음은 이미 성공적으로 시작된 것입니다.</strong></p>
+    <p>
+      첫 입문 단계에서는 컴퓨터의 Agent가 작성하는 <strong>Code를 전혀 이해하지 못해도 시작할 수 있습니다.</strong>
+      학생은 먼저 “내가 무엇을 만들고 싶은가?”와 “완성된 결과가 내가 원했던 것인가?”에 집중하면 됩니다.
+      Coding과 Test의 세부 기술은 지니·토디·애니에게 맡기고,
+      작은 Web App을 여러 번 만들어 같은 Workflow를 반복하면서 자연스럽게 익혀 갑니다.
+      <strong>기술을 다 알아야 시작하는 것이 아니라, 먼저 만들어 보면서 새로운 도전을 계속할 수 있다는 자신감을 얻는 것</strong>이 이 첫 수업의 목표입니다.
+    </p>
+  </div>
+
+  <div class="callout">
+    <strong>첫 번째 Vibe Coding 입문의 학습 목표:</strong><br>
+    이 50% · 40% · 10% 역할 분담은 절대적인 수치가 아니라 <strong>초보자가 무엇에 집중해야 하는지 보여주는 교육용 기준</strong>입니다.
+    처음에는 이 Workflow를 명확한 목표로 잡고,
+    <strong>작은 Web App을 여러 번 만들어 보면서 같은 과정을 반복해 몸에 익히는 것</strong>이 중요합니다.
+    처음부터 CLI 설치법, Agent 내부 구조, 모든 Test 명령이나 Code를 세세하게 이해하려고 부담을 가질 필요는 없습니다.
+    <strong>WHAT을 내가 결정하고 → HOW는 지니에게 맡기고 → 파일로 협업시키고 → 내가 최종 검수한다</strong>는 큰 흐름을 먼저 체화합니다.
+    작은 성공을 반복할수록 학생은 “내가 결정해야 할 것”과 “AI에게 맡겨도 되는 것”을 자연스럽게 구분하고,
+    다음에는 조금 더 어려운 App에도 도전할 마음을 갖게 됩니다.
+  </div>
+</section>
+
+<footer>AI Vibe Coding Workflow Lesson · Student 50/40/10 Role Model · File-based AI Collaboration · 2026</footer>
+</div>
+</main>
+</div>
+
+<script>
+(function(){
+  const links=[...document.querySelectorAll('#toc a')];
+  const targets=links.map(a=>document.querySelector(a.getAttribute('href'))).filter(Boolean);
+  const update=()=>{
+    let current=targets[0];
+    for(const el of targets){ if(el.getBoundingClientRect().top<=120) current=el; }
+    links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+current.id));
+  };
+  document.addEventListener('scroll',update,{passive:true}); update();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>배포란 무엇인가? Google AI Studio Publish와 실제 기기 검증 — Vibe Coding Lesson 6</title>
+<style>
+:root{
+  --bg:#081018; --panel:#111b28; --panel2:#162235; --line:#24344a; --line2:#1a283a;
+  --ink:#eef4fb; --muted:#aab7c8; --dim:#73849a; --accent:#7c8cff; --accent2:#44d0bd;
+  --accent3:#f7b955; --ok:#65d58b; --danger:#ff7f7f; --info:#74b6ff; --radius:16px;
+  --sans:-apple-system,BlinkMacSystemFont,"Pretendard","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;
+  --mono:ui-monospace,"SFMono-Regular","JetBrains Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;color:var(--ink);font-family:var(--sans);line-height:1.72;
+  background:
+    radial-gradient(900px 600px at 85% -10%,rgba(124,140,255,.12),transparent 60%),
+    radial-gradient(800px 500px at 0 20%,rgba(68,208,189,.08),transparent 55%),var(--bg);
+}
+a{color:#9fc5ff}
+.layout{display:flex;max-width:1640px;margin:0 auto;align-items:flex-start}
+.side{
+  width:310px;flex:none;position:sticky;top:0;height:100vh;overflow:auto;
+  border-right:1px solid var(--line2);background:rgba(8,16,24,.96);padding:28px 18px 90px
+}
+.brand{font-size:17px;font-weight:850;line-height:1.35;letter-spacing:-.02em}
+.brand-sub{font:11px/1.5 var(--mono);color:var(--dim);letter-spacing:.05em;margin:7px 0 22px}
+.side nav a{display:block;text-decoration:none;color:var(--muted);font-size:12.8px;padding:7px 10px;border-radius:8px;border-left:2px solid transparent;margin:2px 0}
+.side nav a:hover{background:rgba(124,140,255,.10);color:var(--ink)}
+.side nav a.active{background:rgba(124,140,255,.14);color:#aeb7ff;border-left-color:var(--accent);font-weight:700}
+.side .tiny{margin-top:24px;padding-top:18px;border-top:1px solid var(--line2);font-size:11.5px;color:var(--dim)}
+.main{flex:1;min-width:0}
+.mobile-nav{display:none;position:sticky;top:0;z-index:20;background:rgba(8,16,24,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line2);padding:9px 12px;overflow-x:auto;gap:7px}
+.mobile-nav a{flex:0 0 auto;text-decoration:none;font:11.5px var(--mono);color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:6px 10px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 38px 120px}
+.hero{padding:72px 0 42px;border-bottom:1px solid var(--line2)}
+.kicker{font:12px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--accent2);margin:0 0 14px}
+h1{font-size:clamp(31px,5vw,49px);line-height:1.18;margin:0 0 16px;letter-spacing:-.035em}
+.lede{font-size:17px;color:var(--muted);max-width:86ch;margin:0}
+.meta{display:flex;flex-wrap:wrap;gap:9px;margin-top:24px}
+.tag{font:11px var(--mono);color:var(--muted);padding:6px 11px;border:1px solid var(--line);border-radius:999px;background:rgba(17,27,40,.7)}
+.section{padding-top:66px;scroll-margin-top:24px}
+.section-head{display:flex;gap:14px;align-items:flex-start;margin-bottom:12px}
+.num{font:700 12px var(--mono);background:var(--accent);color:#0a1020;border-radius:8px;padding:5px 9px;margin-top:7px}
+h2{font-size:clamp(23px,3.5vw,31px);line-height:1.3;margin:0;letter-spacing:-.02em}
+h3{font-size:17px;margin:0 0 8px}
+.sub{font:11px var(--mono);color:var(--dim);letter-spacing:.08em;margin:4px 0 0}
+.intro{color:var(--muted);font-size:15.5px;max-width:86ch;margin:14px 0 24px}
+.callout{background:linear-gradient(135deg,rgba(124,140,255,.10),rgba(68,208,189,.06));border:1px solid rgba(124,140,255,.30);border-radius:var(--radius);padding:20px 22px;margin:22px 0}
+.warn{background:rgba(247,185,85,.07);border-color:rgba(247,185,85,.28)}
+.ok{background:rgba(101,213,139,.07);border-color:rgba(101,213,139,.25)}
+.statement{font-size:clamp(20px,3vw,27px);line-height:1.55;font-weight:800;letter-spacing:-.02em;margin:0}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.card{background:var(--panel);border:1px solid var(--line2);border-radius:var(--radius);padding:17px 18px}
+.card .label{font:10px var(--mono);letter-spacing:.12em;color:var(--accent3);margin-bottom:8px}
+.card p,.card li{color:var(--muted);font-size:14px}
+.card ul{margin:8px 0 0;padding-left:18px}
+.pipeline{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;margin:20px 0}
+.pipe{flex:1 1 135px;background:var(--panel);border:1px solid var(--line2);border-radius:12px;padding:14px;min-height:108px;position:relative}
+.pipe b{display:block;color:var(--ink);font-size:14px;margin-bottom:5px}
+.pipe span{display:block;color:var(--muted);font-size:12.5px}
+.pipe.current{border:1px solid var(--accent2);box-shadow:0 0 0 1px rgba(68,208,189,.15),0 0 28px rgba(68,208,189,.12);background:linear-gradient(180deg,rgba(68,208,189,.10),var(--panel))}
+.arrow{align-self:center;color:var(--dim);font:20px var(--mono)}
+.cmd{background:#05090e;border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:10px 0;font:13px/1.65 var(--mono);color:#dce7f3;overflow:auto;white-space:pre-wrap}
+.step-list{display:grid;gap:12px;margin:18px 0}
+.step{display:grid;grid-template-columns:76px 1fr;border:1px solid var(--line2);border-radius:15px;background:var(--panel);overflow:hidden}
+.step .sn{display:flex;align-items:center;justify-content:center;background:rgba(124,140,255,.09);font:800 12px var(--mono);color:#cbd3ff;border-right:1px solid var(--line2);padding:16px 8px}
+.step .body{padding:15px 17px}.step .body strong{display:block;margin-bottom:5px}.step .body p{margin:0;color:var(--muted);font-size:13.8px}
+.role-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0}
+.role{border:1px solid var(--line2);background:var(--panel);border-radius:14px;padding:15px}
+.role .name{font-size:16px;font-weight:850}.role .title{font:10px var(--mono);color:var(--accent2);margin:3px 0 8px}.role p{font-size:12.8px;color:var(--muted);margin:0}
+.bridge{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:9px;align-items:center;margin:18px 0}
+.bridge .node{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:16px;text-align:center}
+.bridge .node b{display:block;margin-bottom:5px}.bridge .node span{font-size:12px;color:var(--muted)}
+.bridge .arr{font-size:21px;color:var(--dim)}
+.matrix{width:100%;border-collapse:collapse;margin:18px 0;font-size:13.5px}
+.matrix th,.matrix td{padding:12px;border-bottom:1px solid var(--line2);text-align:left;vertical-align:top}
+.matrix th{font:11px var(--mono);letter-spacing:.07em;color:var(--dim)}
+.matrix td{color:var(--muted)}
+.good{color:var(--ok);font-weight:750}.bad{color:var(--danger);font-weight:750}.info{color:var(--info);font-weight:750}
+.timeline{position:relative;margin:24px 0;padding-left:26px}
+.timeline:before{content:"";position:absolute;left:7px;top:4px;bottom:4px;width:2px;background:var(--line)}
+.event{position:relative;border:1px solid var(--line2);background:var(--panel);border-radius:14px;padding:16px 18px;margin:0 0 13px}
+.event:before{content:"";position:absolute;left:-24px;top:21px;width:11px;height:11px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px var(--bg)}
+.event .who{font:700 10px var(--mono);letter-spacing:.1em;color:var(--accent2);margin-bottom:5px}
+.event h3{font-size:16px}.event p{font-size:13.5px;color:var(--muted);margin:4px 0}
+.event .files{font:11px var(--mono);color:#b9c8d8;margin-top:8px}
+.loop{display:grid;grid-template-columns:1fr auto 1fr auto 1fr auto 1fr;gap:8px;align-items:center;margin:18px 0}
+.loop .box{border:1px solid var(--line2);background:var(--panel);border-radius:12px;padding:14px;text-align:center}
+.loop .box b{display:block;margin-bottom:4px}.loop .box span{font-size:11.8px;color:var(--muted)}
+.loop .a{color:var(--dim);font-size:20px}
+.final-msg{margin-top:26px;padding:24px;border-radius:16px;border:1px solid rgba(68,208,189,.3);background:rgba(68,208,189,.07)}
+.final-msg p{font-size:20px;font-weight:800;margin:0;line-height:1.6}
+.check{margin:14px 0 0;padding-left:20px;color:var(--muted)}
+.check li{margin:7px 0}
+.sourcebox{margin-top:24px;border:1px solid var(--line2);border-radius:14px;padding:16px;background:#0d1721}
+.sourcebox h3{font-size:14px}.sourcebox li{font-size:12.5px;color:var(--muted);margin:7px 0}
+footer{margin-top:72px;padding-top:24px;border-top:1px solid var(--line2);color:var(--dim);font:11px var(--mono);text-align:center}
+
+.deploy-ways{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:18px 0}
+.deploy-way{background:var(--panel);border:1px solid var(--line2);border-radius:14px;padding:16px}
+.deploy-way b{display:block;font-size:15px;margin-bottom:5px}
+.deploy-way .kind{font:10px var(--mono);letter-spacing:.08em;color:var(--accent2);margin-bottom:7px}
+.deploy-way p{margin:0;color:var(--muted);font-size:12.8px}
+.deploy-way.current{border-color:rgba(68,208,189,.55);background:linear-gradient(180deg,rgba(68,208,189,.09),var(--panel))}
+.analogy-row{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:stretch;margin:20px 0}
+.analogy-box{border:1px solid var(--line2);background:var(--panel);border-radius:14px;padding:18px;text-align:center}
+.analogy-box b{display:block;margin-bottom:6px}
+.analogy-box span{color:var(--muted);font-size:13px}
+.analogy-arrow{align-self:center;color:var(--dim);font:24px var(--mono)}
+@media(max-width:900px){.deploy-ways{grid-template-columns:1fr 1fr}}
+@media(max-width:720px){.deploy-ways,.analogy-row{grid-template-columns:1fr}.analogy-arrow{transform:rotate(90deg);text-align:center}}
+
+
+/* Lesson 6: 중요 설명은 섹션 전체 폭을 활용 */
+.section > .intro,
+.section > .callout,
+.section > .final-msg,
+.section > .cmd,
+.section > .matrix{
+  width:100%;
+  max-width:none;
+}
+.section-head > div{flex:1;min-width:0}
+.section-head h2{max-width:none}
+
+.concept-box{
+  margin:20px 0;
+  padding:20px 22px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:linear-gradient(135deg,rgba(124,140,255,.07),rgba(68,208,189,.04));
+}
+.concept-box h3{font-size:18px;margin:0 0 8px}
+.concept-box p{margin:7px 0;color:var(--muted);font-size:14px}
+
+.responsive-map{
+  display:grid;
+  grid-template-columns:1fr auto 1fr auto 1fr;
+  gap:10px;
+  align-items:stretch;
+  margin:20px 0;
+}
+.responsive-map .rbox{
+  border:1px solid var(--line2);
+  background:var(--panel);
+  border-radius:14px;
+  padding:17px;
+  text-align:center;
+}
+.responsive-map .rbox b{display:block;font-size:14px;margin-bottom:5px}
+.responsive-map .rbox span{color:var(--muted);font-size:12.5px}
+.responsive-map .rarr{align-self:center;color:var(--dim);font:22px var(--mono)}
+
+.screen-rules{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+  margin:18px 0;
+}
+.screen-rule{
+  border:1px solid var(--line2);
+  background:var(--panel);
+  border-radius:14px;
+  padding:16px;
+}
+.screen-rule b{display:block;font-size:14px;margin-bottom:5px}
+.screen-rule p{margin:0;color:var(--muted);font-size:12.8px}
+
+.cache-compare{
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  gap:12px;
+  align-items:stretch;
+  margin:18px 0;
+}
+.cache-card{
+  background:var(--panel);
+  border:1px solid var(--line2);
+  border-radius:14px;
+  padding:17px;
+}
+.cache-card b{display:block;font-size:15px;margin-bottom:5px}
+.cache-card p{margin:0;color:var(--muted);font-size:13px}
+.cache-arrow{align-self:center;color:var(--dim);font:22px var(--mono)}
+
+@media(max-width:900px){
+  .responsive-map,.cache-compare{grid-template-columns:1fr}
+  .responsive-map .rarr,.cache-arrow{transform:rotate(90deg);text-align:center}
+  .screen-rules{grid-template-columns:1fr}
+}
+
+@media(max-width:1180px){.side{display:none}.mobile-nav{display:flex}.wrap{padding:0 22px 90px}}
+@media(max-width:900px){.role-grid{grid-template-columns:1fr 1fr}.bridge,.loop{grid-template-columns:1fr}.bridge .arr,.loop .a{transform:rotate(90deg);text-align:center}}
+@media(max-width:720px){.cards,.role-grid{grid-template-columns:1fr}.hero{padding-top:44px}.wrap{padding-left:15px;padding-right:15px}.arrow{display:none}.step{grid-template-columns:58px 1fr}}
+@media print{
+ body{background:#fff;color:#111}.side,.mobile-nav{display:none!important}.wrap{max-width:none;padding:0 16mm 18mm}
+ .hero{padding-top:10mm}.card,.callout,.pipe,.step,.role,.node,.event,.box,.sourcebox{background:#fff!important;border-color:#bbb!important}
+ p,li,.intro,.lede,.card p,.card li,.pipe span,.role p,.matrix td,.event p{color:#333!important}
+ h1,h2,h3,.statement,.final-msg p{color:#111!important}.cmd{background:#fff;color:#111;border-color:#bbb}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside class="side">
+  <div class="brand">Google AI Studio Publish<br>Lesson 6</div>
+  <div class="brand-sub">GITHUB SOURCE → AI STUDIO → PUBLISH → REAL DEVICE QA</div>
+  <nav id="toc">
+    <a href="#top">표지 · 이번 단계</a>
+    <a href="#deployconcept">00 배포란 무엇인가</a>
+    <a href="#pages">01 배포 방법과 AI Studio</a>
+    <a href="#realurl">02 AI Studio Publish 순서</a>
+    <a href="#mobile">03 반응형 Web · 스마트폰</a>
+    <a href="#report">04 Web과 출력물 구분</a>
+    <a href="#responsive">05 화면 크기별 Layout</a>
+    <a href="#cache">06 Cache · 재배포</a>
+    <a href="#finalmobile">07 배포 완료 기준</a>
+  </nav>
+  <div class="tiny">Lesson series · 한 페이지 HTML · 좌측 목차 / 우측 본문 · Responsive</div>
+</aside>
+
+<main class="main">
+<nav class="mobile-nav"><a href="#deployconcept">Repository와 App</a><a href="#pages">AI Studio Publish</a><a href="#realurl">실제 URL Test</a><a href="#mobile">반응형·스마트폰</a><a href="#report">Web과 출력물 구분</a><a href="#responsive">화면별 Layout</a><a href="#cache">Cache</a></nav>
+<div class="wrap">
+<header class="hero" id="top">
+  <p class="kicker">AI VIBE CODING · DEPLOYMENT & REAL DEVICE QA</p>
+  <h1>GitHub에 저장한 App을<br>Google AI Studio로 실제 Web에 배포해 보자</h1>
+  <p class="lede">
+    이전 단계에서 GitHub에 최종 Source Code와 Version을 안전하게 저장했습니다.
+    이제 <strong>배포(Deploy/Publish)</strong>, 즉 저장된 Code를 실제 Internet에서 실행해
+    다른 사람이 URL로 접속할 수 있게 만드는 단계로 넘어갑니다.
+    배포 방법은 GitHub Pages, Netlify, Vercel 등 다양하지만,
+    이번 수업에서는 <strong>Google AI Studio로 Import(가져오기) → Preview(미리 실행해 보기) → Publish(배포: Internet에서 접속할 수 있게 공개)</strong>하는 과정을 경험합니다.
+  </p>
+  <div class="meta">
+    <span class="tag">이전 · GitHub 저장 / Version 확정</span>
+    <span class="tag">현재 · Google AI Studio Publish</span>
+    <span class="tag">배포 = 실제 URL로 공개</span>
+    <span class="tag">Preview 후 사람 승인</span>
+    <span class="tag">마지막 · 실제 스마트폰 Acceptance</span>
+  </div>
+</header>
+
+
+<section class="section" id="deployconcept">
+  <div class="section-head"><span class="num">00</span><div><h2>배포(Deploy/Publish)는 무엇일까? — “창고의 상품을 실제 매장에 진열하는 것”</h2><p class="sub">REPOSITORY ≠ DEPLOYED WEBSITE</p></div></div>
+
+  <p class="intro">
+    GitHub에 Source Code(소스 코드: Web App을 만드는 원본 파일)를 저장한 것과
+    사람들이 실제 Web App을 사용하는 것은 서로 다른 단계입니다.
+    <strong>배포(Deploy/Publish)</strong>는 저장된 Code를 실제로 실행할 수 있는 Web 환경에 올려
+    <strong>공개 URL(Internet 주소)</strong>을 만드는 과정입니다.
+  </p>
+
+  <div class="analogy-row">
+    <div class="analogy-box">
+      <b>GitHub Repository</b>
+      <span>완성된 파일과 Version 기록을 보관하는 <strong>창고</strong></span>
+    </div>
+    <div class="analogy-arrow">→</div>
+    <div class="analogy-box">
+      <b>Deployment / Publish</b>
+      <span>사람들이 실제로 들어와 체험할 수 있는 <strong>매장과 주소(URL)</strong>를 만드는 것</span>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>GitHub에서도 직접 배포할 수 있습니다.</strong><br>
+    GitHub Pages는 <strong>정적 Web(서버에서 복잡한 계산을 하지 않고, 준비된 HTML·CSS·JavaScript 파일을 브라우저에 그대로 보여주는 비교적 단순한 Web 방식)</strong>을
+    URL로 공개할 수 있는 기능입니다.
+    즉 GitHub는 저장·Version 관리가 중심이지만, 간단한 Web App은 GitHub Pages를 이용해 바로 배포할 수도 있습니다.
+  </div>
+
+  <div class="concept-box">
+    <h3>그럼 왜 Google AI Studio도 사용할까?</h3>
+    <p>
+      Web App을 Internet에 공개하는 방법은 하나가 아닙니다.
+      GitHub Pages, Google AI Studio, Netlify, Vercel 등 여러 서비스가 있고,
+      각각 지원하는 실행환경과 편의 기능이 조금씩 다릅니다.
+      이번 수업에서는 <strong>“같은 App을 다른 배포 공간에도 올릴 수 있다”</strong>는 것을 경험하기 위해 Google AI Studio를 사용합니다.
+    </p>
+  </div>
+</section>
+
+<section class="section" id="pages">
+  <div class="section-head"><span class="num">01</span><div><h2>배포 방법은 여러 가지다 — 이번 수업은 Google AI Studio</h2><p class="sub">MANY DEPLOYMENT OPTIONS · ONE LEARNING PATH</p></div></div>
+  <div class="deploy-ways">
+    <div class="deploy-way"><div class="kind">GITHUB</div><b>GitHub Pages</b><p>GitHub Repository의 정적 HTML/CSS/JS를 비교적 간단하게 Web URL로 공개할 수 있습니다.</p></div>
+    <div class="deploy-way current"><div class="kind">GOOGLE</div><b>Google AI Studio</b><p>GitHub에서 App을 <strong>Import(가져오기)</strong>하고 <strong>Preview(미리 실행해 보기)</strong>한 뒤 <strong>Publish(배포: Internet에서 접속할 수 있게 공개)</strong>하여 AI Studio 공개 URL을 만드는 방법을 이번 수업에서 사용합니다.</p></div>
+    <div class="deploy-way"><div class="kind">HOSTING</div><b>Netlify</b><p>Web 프로젝트를 Git 저장소와 연결해 자동 Build·Deploy하는 데 널리 쓰이는 배포 서비스입니다.</p></div>
+    <div class="deploy-way"><div class="kind">HOSTING</div><b>Vercel</b><p>Frontend Web App을 Git 저장소와 연결해 배포하고 Version별 Preview를 관리할 수 있는 서비스입니다.</p></div>
+  </div>
+  <div class="callout ok"><strong>학생이 기억할 한 가지:</strong> “배포 방법에는 정답 하나만 있는 것이 아니다.” 이번 과정은 Google 생태계를 경험하는 수업이므로 <strong>Google AI Studio Publish</strong>를 선택합니다.</div>
+</section>
+
+<section class="section" id="realurl">
+  <div class="section-head"><span class="num">02</span><div><h2>Google AI Studio 배포 순서 — 가져오기 → 미리보기 → 공개 → 실제 URL 확인</h2><p class="sub">GITHUB MAIN → IMPORT → PREVIEW → PUBLISH → VISIT</p></div></div>
+
+  <div class="pipeline">
+    <div class="pipe"><b>GitHub main</b><span>검증된 최신 Version</span></div><div class="arrow">→</div>
+    <div class="pipe"><b>Import</b><span>가져오기 · GitHub 파일을 AI Studio로 불러오기</span></div><div class="arrow">→</div>
+    <div class="pipe"><b>Preview</b><span>미리보기 · 실제로 실행해 기능 확인</span></div><div class="arrow">→</div>
+    <div class="pipe"><b>Publish</b><span>배포 · 학생이 Internet 공개 승인</span></div><div class="arrow">→</div>
+    <div class="pipe current"><b>Visit</b><span>공개된 실제 URL 열어보기</span></div>
+  </div>
+
+  <div class="callout warn">
+    <strong>Preview가 정상이어야 Publish합니다.</strong><br>
+    Import 과정에서 AI Studio가 실행환경을 맞추기 위해 일부 설정 파일을 보완할 수 있습니다.
+    이때 App의 핵심 기능을 마음대로 바꾸는 것이 아니라
+    <strong>AI Studio에서 실행되기 위해 필요한 환경만 최소한으로 맞춘다</strong>고 이해하면 됩니다.
+  </div>
+
+  <ul class="check">
+    <li>첫 화면이 정상으로 보이는가?</li>
+    <li>시작 버튼과 핵심 기능이 작동하는가?</li>
+    <li>결과 화면이 정상 출력되는가?</li>
+    <li>PNG/PDF 같은 다운로드 기능이 필요한 경우 정상 작동하는가?</li>
+    <li>Preview(미리보기)가 정상인 것을 확인한 뒤 학생이 Publish(배포)를 승인했는가?</li>
+    <li>Publish 후 실제 공개 URL에서 다시 확인했는가?</li>
+  </ul>
+</section>
+
+<section class="section" id="mobile">
+  <div class="section-head"><span class="num">03</span><div><h2>왜 스마트폰에서도 확인할까? — 하나의 페이지가 여러 화면 크기에 맞아야 한다</h2><p class="sub">RESPONSIVE WEB APP · ONE PAGE, MANY SCREEN SIZES</p></div></div>
+
+  <p class="intro">
+    같은 Web App이라도 PC Browser(브라우저: Web 페이지를 보는 프로그램)와 스마트폰은 화면 크기가 크게 다릅니다.
+    PC에서 두 칸으로 보기 좋은 화면을 스마트폰에서 그대로 보여주면 글자가 너무 작아지거나,
+    버튼과 Card가 서로 겹치거나, 옆으로 Scroll해야 하는 문제가 생길 수 있습니다.
+  </p>
+
+  <div class="concept-box">
+    <h3>그래서 “반응형 Web App”으로 만들어 달라고 합니다</h3>
+    <p>
+      <strong>반응형 Web App(Responsive Web App)</strong>은 같은 Web 페이지 하나가
+      PC·Tablet·Smartphone의 화면 폭에 맞춰 <strong>배치와 크기를 스스로 바꾸어 보여주는 방식</strong>입니다.
+      PC용 페이지와 스마트폰용 페이지를 따로 만드는 것이 아니라,
+      <strong>한 페이지 안에 “넓을 때는 이렇게, 좁을 때는 이렇게”라는 여러 화면 규칙을 함께 넣어 두는 것</strong>입니다.
+    </p>
+  </div>
+
+  <div class="responsive-map">
+    <div class="rbox"><b>브라우저가 화면 폭을 안다</b><span>예: 1440px, 430px, 390px</span></div>
+    <div class="rarr">→</div>
+    <div class="rbox"><b>CSS의 화면 규칙을 선택</b><span>넓은 화면 규칙 / 좁은 화면 규칙</span></div>
+    <div class="rarr">→</div>
+    <div class="rbox"><b>같은 페이지를 다르게 배치</b><span>2열 → 1열 · 버튼 폭 확대 · 글자 줄바꿈 조정</span></div>
+  </div>
+
+  <p class="intro">
+    즉, 브라우저는 자신이 사용할 수 있는 화면 폭(Viewport, 뷰포트: Web 페이지가 실제로 보이는 영역)을 알고 있고,
+    Web 페이지 안에 미리 작성된 CSS 규칙이 그 폭에 맞는 Layout(레이아웃: 화면 배치)을 선택합니다.
+    이것이 반응형 화면의 핵심입니다.
+  </p>
+
+  <table class="matrix">
+    <thead><tr><th>실제 스마트폰에서 발견할 수 있는 문제</th><th>수정 방향</th></tr></thead>
+    <tbody>
+      <tr><td>직업명 + 참고 배지 가로 충돌</td><td><span class="good">좁은 화면에서는 위·아래로 분리</span></td></tr>
+      <tr><td>긴 제목이 어색하게 줄바꿈됨</td><td><span class="good">한글 단어가 자연스럽게 묶이도록 조정</span></td></tr>
+      <tr><td>Card 안의 글을 읽을 공간이 좁음</td><td><span class="good">스마트폰에서는 좌우 여백을 줄여 본문 폭 확보</span></td></tr>
+      <tr><td>출처와 상세 링크가 한 줄에서 경쟁</td><td><span class="good">각각 별도 줄로 배치</span></td></tr>
+      <tr><td>하단 버튼이 작거나 나란히 있어 누르기 어려움</td><td><span class="good">버튼을 한 줄씩 넓게 배치</span></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="section" id="report">
+  <div class="section-head"><span class="num">04</span><div><h2>중요 — Web 화면과 PNG/PDF 출력물은 서로 다른 UI다</h2><p class="sub">SCREEN UI VS EXPORT TEMPLATE</p></div></div>
+  <div class="cards">
+    <div class="card"><div class="label">WEB UI</div><h3>스마트폰에 맞춰 Responsive</h3><p>화면 폭에 따라 Card, Button, Text가 자연스럽게 재배치되어야 합니다.</p></div>
+    <div class="card"><div class="label">PNG / PDF REPORT</div><h3>고정된 인쇄형 Layout</h3><p>다운로드 결과물은 이미 보기 좋았으므로 모바일 Web 수정 때문에 Report CSS가 바뀌지 않도록 보호했습니다.</p></div>
+  </div>
+  <div class="callout ok"><strong>Regression 원칙:</strong> Web UI를 고쳤는데 PNG/PDF가 망가지면 수정은 실패입니다. 따라서 기능 하나를 고쳐도 기존 정상 기능을 다시 Test해야 합니다.</div>
+</section>
+
+<section class="section" id="responsive">
+  <div class="section-head"><span class="num">05</span><div><h2>반응형 UI는 “작게 줄이기”가 아니라 화면 크기에 맞춰 다시 배치하는 것</h2><p class="sub">RESPONSIVE UI = DIFFERENT LAYOUT RULES IN ONE PAGE</p></div></div>
+
+  <p class="intro">
+    반응형 Web App은 모든 화면을 똑같이 축소해서 보여주는 것이 아닙니다.
+    같은 HTML 페이지 안에 여러 화면 크기에 맞는 CSS 규칙을 함께 적어 두고,
+    브라우저가 자신의 화면 폭을 기준으로 알맞은 규칙을 적용합니다.
+  </p>
+
+  <div class="step-list">
+    <div class="step"><div class="sn">360px</div><div class="body"><strong>화면 폭 360px</strong><p>작은 스마트폰에서도 옆으로 Scroll하지 않고 읽고 누를 수 있게 한 열 중심으로 배치합니다.</p></div></div>
+    <div class="step"><div class="sn">390px</div><div class="body"><strong>화면 폭 390px</strong><p>일반적인 스마트폰에서 Card, 안내문, 버튼이 자연스럽게 이어지는지 확인합니다.</p></div></div>
+    <div class="step"><div class="sn">430px</div><div class="body"><strong>화면 폭 430px</strong><p>큰 스마트폰에서도 여백이 지나치게 커지지 않고 정보 순서가 유지되는지 확인합니다.</p></div></div>
+    <div class="step"><div class="sn">PC</div><div class="body"><strong>넓은 PC 화면</strong><p>스마트폰용 규칙을 추가한 뒤에도 PC 화면의 2열·넓은 Layout이 깨지지 않았는지 다시 확인합니다.</p></div></div>
+  </div>
+
+  <div class="screen-rules">
+    <div class="screen-rule"><b>넓은 화면</b><p>Card를 좌우 2열로 배치하고 넓은 여백을 사용합니다.</p></div>
+    <div class="screen-rule"><b>중간 화면</b><p>글자와 Card 폭을 줄이고 필요한 요소를 조금씩 재배치합니다.</p></div>
+    <div class="screen-rule"><b>좁은 화면</b><p>2열을 1열로 바꾸고 버튼을 넓게 만들어 손가락으로 쉽게 누르게 합니다.</p></div>
+  </div>
+
+  <div class="callout">
+    <strong>한 페이지에 여러 화면용 규칙이 함께 들어 있습니다.</strong><br>
+    브라우저가 “지금 내가 보여줄 수 있는 폭이 얼마인지” 알고,
+    Web 페이지의 CSS가 그 폭에 맞는 규칙을 골라 적용합니다.
+    그래서 PC와 스마트폰에서 서로 다른 App을 보는 것처럼 보여도
+    실제로는 <strong>같은 Web 페이지가 화면 크기에 맞춰 다른 Layout을 선택</strong>하고 있는 것입니다.
+  </div>
+</section>
+
+<section class="section" id="cache">
+  <div class="section-head"><span class="num">06</span><div><h2>수정했는데 예전 화면이 보인다면 Browser Cache와 Republish를 확인한다</h2><p class="sub">CACHE · REPUBLISH AWARENESS</p></div></div>
+
+  <p class="intro">
+    <strong>Browser Cache(브라우저 캐시: 한 번 받아 본 이미지·CSS·JavaScript 같은 파일을 다음에 더 빨리 보여주기 위해 내 PC나 스마트폰에 잠시 저장해 두는 임시 저장공간)</strong> 때문에,
+    새 Version을 배포했는데도 잠시 예전 화면이 보일 수 있습니다.
+  </p>
+
+  <div class="cache-compare">
+    <div class="cache-card">
+      <b>Internet에는 새 Version이 있음</b>
+      <p>GitHub 또는 AI Studio에는 이미 수정된 파일이 배포되어 있습니다.</p>
+    </div>
+    <div class="cache-arrow">↔</div>
+    <div class="cache-card">
+      <b>내 Browser가 예전 파일을 기억하고 있음</b>
+      <p>속도를 높이려고 보관해 둔 Cache 때문에 이전 화면을 먼저 보여줄 수 있습니다.</p>
+    </div>
+  </div>
+
+  <div class="concept-box">
+    <h3>또 하나의 경우 — GitHub만 수정하고 AI Studio는 다시 배포하지 않은 경우</h3>
+    <p>
+      GitHub Pages와 Google AI Studio는 서로 다른 배포 공간입니다.
+      GitHub의 Source를 수정해도 AI Studio가 자동으로 최신 Version이 되는 것은 아닙니다.
+      AI Studio에도 최신 Source를 다시 <strong>Import(가져오기)</strong>하고
+      Preview를 확인한 뒤 <strong>Republish(재배포: 수정된 Version을 다시 Internet에 공개)</strong>해야 합니다.
+    </p>
+  </div>
+
+  <div class="callout">
+    <strong>확인 순서:</strong><br>
+    ① GitHub main에 최신 Version이 있는가? →
+    ② Google AI Studio에 최신 Version을 Import(가져오기)했는가? →
+    ③ Preview(미리보기)가 정상인가? →
+    ④ 학생이 Publish/Republish(배포/재배포)를 승인했는가? →
+    ⑤ 실제 URL에서 새로고침하거나 Browser Cache를 비운 뒤 다시 확인했는가?
+  </div>
+</section>
+
+<section class="section" id="finalmobile">
+  <div class="section-head"><span class="num">07</span><div><h2>배포 완료의 기준 — “URL이 생겼다”가 아니라 실제로 잘 사용할 수 있어야 한다</h2><p class="sub">FINAL DEPLOYMENT & HUMAN ACCEPTANCE</p></div></div>
+
+  <div class="pipeline">
+    <div class="pipe"><b>GitHub main</b><span>최신 Version 확인</span></div><div class="arrow">→</div>
+    <div class="pipe"><b>AI Studio Import</b><span>가져오기 · 최신 Source 반영</span></div><div class="arrow">→</div>
+    <div class="pipe"><b>Preview</b><span>미리보기 · 실행과 기능 확인</span></div><div class="arrow">→</div>
+    <div class="pipe"><b>학생 Publish 승인</b><span>배포 · Internet 공개 허락</span></div><div class="arrow">→</div>
+    <div class="pipe"><b>실제 공개 URL</b><span>PC·스마트폰에서 직접 사용</span></div><div class="arrow">→</div>
+    <div class="pipe current"><b>학생 최종 PASS</b><span>내가 원한 결과인지 최종 판단</span></div>
+  </div>
+
+  <div class="callout">
+    <strong>학생이 여기서 기억할 한 줄:</strong><br>
+    <strong>“GitHub 최신 Version → AI Studio Import(가져오기) → Preview(미리보기) → 학생 Publish 승인(배포) → 실제 공개 URL 확인 → 학생 최종 PASS”</strong>
+    순서를 이해하면 됩니다.
+  </div>
+
+  <div class="final-msg">
+    <p>“배포 성공”은 URL을 하나 만든 것으로 끝나지 않는다.<br>
+    <strong>PC와 스마트폰에서 직접 사용해 보고, 내가 원한 기능과 화면이 제대로 동작한다고 학생이 판단해야 진짜 완료다.</strong></p>
+  </div>
+</section>
+
+
+<footer>AI Vibe Coding Case Study · Lesson 6 · Deployment Concept · Google AI Studio Publish · Real Device QA · 2026</footer>
+</div>
+</main>
+</div>
+
+<script>
+(function(){
+  const links=[...document.querySelectorAll('#toc a')];
+  const targets=links.map(a=>document.querySelector(a.getAttribute('href'))).filter(Boolean);
+  const update=()=>{
+    let current=targets[0];
+    for(const el of targets){if(el.getBoundingClientRect().top<=120) current=el;}
+    links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+current.id));
+  };
+  document.addEventListener('scroll',update,{passive:true});update();
+})();
+</script>
+</body>
+</html>

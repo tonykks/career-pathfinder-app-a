@@ -73,7 +73,7 @@ body {
 }
 
 .header-container {
-  max-width: 1100px;
+  max-width: 900px;
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
@@ -84,28 +84,29 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 1.25rem;
-  font-weight: 700;
+  font-size: 1.3rem;
+  font-weight: 800;
   color: #FFFFFF;
 }
 
 .logo i {
   color: var(--accent-teal-light);
-  font-size: 1.4rem;
+  font-size: 1.5rem;
 }
 
 .app-badge {
   background: var(--accent-indigo);
   color: #FFFFFF;
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
   margin-left: 6px;
+  letter-spacing: 0.5px;
 }
 
 .header-subtitle {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: var(--text-light);
   font-weight: 500;
 }
@@ -121,7 +122,7 @@ body {
 }
 
 .hackathon-nav .nav-container {
-  max-width: 1100px;
+  max-width: 900px;
   margin: 0 auto;
   display: flex;
   align-items: center;
@@ -139,8 +140,12 @@ body {
 }
 
 .hackathon-nav .nav-links {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
   gap: 8px;
+  width: 100%;
+  min-width: 0;
+  flex: 1;
   align-items: center;
 }
 
@@ -160,6 +165,8 @@ body {
   transition: var(--transition);
   white-space: nowrap;
   min-height: 38px;
+  width: 100%;
+  text-align: center;
 }
 
 .hackathon-nav .nav-btn:hover {
@@ -182,10 +189,19 @@ body {
   }
   
   .hackathon-nav .nav-links {
-    width: 100%;
+    display: flex;
+    gap: 8px;
+    width: auto;
+    max-width: 100%;
+    flex: 0 1 auto;
     overflow-x: auto;
     padding-bottom: 6px;
     -webkit-overflow-scrolling: touch;
+  }
+
+  .hackathon-nav .nav-btn {
+    flex: 1 0 110px;
+    width: auto;
   }
   
   .hackathon-nav .nav-links::-webkit-scrollbar {
@@ -961,7 +977,7 @@ body {
 /* Responsive Media Queries for Mobile & Tablet */
 @media (max-width: 768px) {
   .app-header {
-    padding: 12px 16px;
+    padding: 16px 24px;
   }
   
   .header-container {
@@ -970,18 +986,18 @@ body {
   }
 
   .logo {
-    font-size: 1.1rem;
-    gap: 6px;
+    font-size: 1.15rem;
+    gap: 10px;
   }
 
   .logo i {
-    font-size: 1.2rem;
+    font-size: 1.5rem;
   }
 
   .app-badge {
     font-size: 0.7rem;
-    padding: 2px 6px;
-    margin-left: 4px;
+    padding: 3px 10px;
+    margin-left: 6px;
   }
 
   .header-subtitle {

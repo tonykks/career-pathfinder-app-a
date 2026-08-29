@@ -107,10 +107,10 @@ footer{margin-top:72px;padding-top:24px;border-top:1px solid var(--line2);color:
     <a href="#interview">03 1:1 대화 구체화 과정</a>
     <a href="#summary">04 구체화 결과 비교</a>
     <a href="#intent-express">05 이렇게 말했어야 했다</a>
-    <a href="#spec">06 1차 requirements.md 생성</a>
-    <a href="#review">07 잠깐! 다시 검토하기</a>
-    <a href="#research">08 Research가 필요한 이유</a>
-    <a href="#edu">09 학생 교육용 시사점</a>
+    <a href="#spec">06 requirements.md 생성</a>
+    <a href="#review">07 지니에게 전달</a>
+    <a href="#research">08 Deep Research · BRIEF.md</a>
+    <a href="#edu">09 학생 교육용 핵심</a>
   </nav>
   <div class="tiny">한 페이지 HTML · 좌측 목차 / 우측 본문 · Responsive · 외부 Library 없음</div>
 </aside>
@@ -118,7 +118,7 @@ footer{margin-top:72px;padding-top:24px;border-top:1px solid var(--line2);color:
 <main class="main">
 <nav class="mobile-nav">
   <a href="#concept">개념</a><a href="#initial">1차 시도</a><a href="#rules">대화 규칙</a>
-  <a href="#interview">1:1 대화</a><a href="#summary">결과 비교</a><a href="#intent-express">의도 표현</a><a href="#spec">1차 requirements</a><a href="#review">다시 검토</a><a href="#research">Research</a><a href="#edu">교육 가치</a>
+  <a href="#interview">1:1 대화</a><a href="#summary">결과 비교</a><a href="#intent-express">의도 표현</a><a href="#spec">requirements</a><a href="#review">지니 전달</a><a href="#research">Research·BRIEF</a><a href="#edu">교육 핵심</a>
 </nav>
 
 <div class="wrap">
@@ -127,7 +127,7 @@ footer{margin-top:72px;padding-top:24px;border-top:1px solid var(--line2);color:
   <h1>AI와 한 가지씩 대화하며<br>내 생각 구체화하기</h1>
   <p class="lede">
     “진로 탐색 웹앱을 만들고 싶다”라는 막연한 한 문장으로 시작해, AI가 질문 하나씩만 던지도록 가두고
-    <strong>20번의 짧은 릴레이 질의응답을 거쳐 구현 가능한 수준의 1차 요구사항 명세서(requirements.md)로 정리</strong>하는 실제 수업 사례입니다.
+    <strong>20번의 짧은 릴레이 질의응답으로 생각을 구체화한 뒤, 그 요구사항을 AI Agent가 이해할 수 있는 requirements.md로 정리</strong>하는 실제 수업 사례입니다.
   </p>
   <div class="meta">
     <span class="tag">대상 · 코딩 완전 입문 고등학생</span>
@@ -342,18 +342,25 @@ footer{margin-top:72px;padding-top:24px;border-top:1px solid var(--line2);color:
 
   <div class="callout">
     <strong>💡 교육 포인트:</strong><br>
-    “처음부터 이렇게 길고 구체적인 문장을 쓸 수 있는 사람은 많지 않습니다. 
-    하지만 <strong>AI에게 질문을 던지게 하고 한 번에 하나씩 대답하다 보면</strong>, 머릿속에 흩어져 있던 생각을 훨씬 구체적으로 정리할 수 있습니다. 
-    이 문장을 바탕으로 AI에게 <strong>구현할 수 있을 만큼 구체화된 1차 요구사항(requirements.md)</strong>을 만들게 할 수 있습니다. 다만 이것이 곧 ‘정확하고 완벽한 요구사항’이라는 뜻은 아니므로 다음 단계에서 다시 검토해야 합니다.”
+    “처음부터 이렇게 길고 구체적인 문장을 쓸 수 있는 사람은 많지 않습니다.
+    하지만 <strong>AI에게 질문을 던지게 하고 한 번에 하나씩 대답하다 보면</strong>, 머릿속에 흩어져 있던 생각을 훨씬 구체적으로 정리할 수 있습니다.
+    이렇게 구체화된 요구사항은 Gemini가 <strong>requirements.md</strong>로 정리하게 합니다.
+    학생은 이 문서가 자신의 의도를 충분히 담고 있는지 큰 틀에서 확인하고, 빠진 요구나 바꾸고 싶은 점이 있으면 Gemini와 다시 대화해 보완하면서 요구사항을 확정해 나갑니다.”
   </div>
 </section>
 
 <section class="section" id="spec">
-  <div class="section-head"><span class="num">06</span><div><h2>1차 requirements.md 생성 — AI 에이전트 개발용 명세서</h2><p class="sub">FIRST REQUIREMENTS DOCUMENT</p></div></div>
-  <p class="intro">20단계 질의응답과 구체화된 의도 문장을 바탕으로 AI가 <strong>1차로 정리한 요구사항 명세서</strong> 전문입니다. 다음 단계에서 이 문서에 학생이 정하지 않은 내용이나 근거가 부족한 내용이 섞였는지 다시 확인합니다.</p>
+  <div class="section-head"><span class="num">06</span><div><h2>requirements.md 생성 — 학생의 의도를 Agent에게 전달하는 명세서</h2><p class="sub">REQUIREMENTS DOCUMENT FOR THE AGENT</p></div></div>
+  <p class="intro">
+    20단계 질의응답과 학생이 확정한 요구사항을 바탕으로 Gemini가
+    <strong>Antigravity IDE의 Agent가 읽고 구현할 수 있는 형태의 requirements.md</strong>로 정리합니다.
+    학생이 이 문서의 기술 용어나 구조를 하나하나 정확하게 이해할 필요는 없습니다.
+    <strong>“내가 원하는 것을 Agent에게 전달하려면 이런 명세서 형태로 정리해 주는구나”</strong> 정도로 이해하면 충분합니다.
+    다만 자신의 핵심 요구가 빠지지 않았는지는 큰 틀에서 확인합니다.
+  </p>
 
   <div class="prompt-card">
-    <div class="step">AI가 정리한 1차 requirements.md 전문 · 검토 전</div>
+    <div class="step">Gemini가 정리한 requirements.md 전문 · Agent 전달용</div>
     <button class="copy-btn" onclick="copyText(this)">복사</button>
     <div class="prompt-text"># Requirements Document: 고등학생 맞춤형 진로 탐색 Web App
 
@@ -465,75 +472,90 @@ footer{margin-top:72px;padding-top:24px;border-top:1px solid var(--line2);color:
 </section>
 
 <section class="section" id="review">
-  <div class="section-head"><span class="num">07</span><div><h2>잠깐! 자세하다고 맞는 것은 아니다</h2><p class="sub">DETAILED DOES NOT ALWAYS MEAN CORRECT</p></div></div>
+  <div class="section-head"><span class="num">07</span><div><h2>requirements.md 확정 후 — 지니에게 전달한다</h2><p class="sub">HAND OFF THE “WHAT” TO ANTIGRAVITY</p></div></div>
   <p class="intro">
-    requirements.md가 길고 자세해졌다고 해서 바로 Coding으로 넘어가면 안 됩니다.
-    <strong>학생이 직접 결정한 내용</strong>과 <strong>AI가 빈칸을 채우며 추가한 내용</strong>이 섞여 있을 수 있기 때문입니다.
+    학생이 Gemini와 대화를 반복해 요구사항을 확정했다면, 이제 requirements.md의 기술적인 표현을 더 깊이 공부할 필요는 없습니다.
+    <strong>이 문서는 “무엇을 만들 것인가”를 지니에게 전달하기 위한 문서</strong>입니다.
+    학생은 requirements.md를 Antigravity IDE의 지니에게 넘기고, 지니가 문서를 읽어 학생의 의도를 정확히 이해하도록 합니다.
   </p>
 
   <div class="cards">
     <div class="card">
-      <div class="label">CHECK 1 · 우리가 정했나?</div>
-      <h3>AI가 새로 넣은 내용 찾기</h3>
-      <p>대화에서는 “깔끔하고 단정한 느낌”이라고만 했는데 requirements.md에는 Slate Blue / Calm Teal / Off-White가 추가되었습니다. HTML5, Vanilla JavaScript, html2pdf.js, 0.1초 같은 기술·성능 기준도 학생이 직접 정한 내용은 아닙니다.</p>
+      <div class="label">STUDENT · 전달</div>
+      <h3>요구사항을 지니에게 넘긴다</h3>
+      <p>학생의 역할은 구현 방법을 직접 정하는 것이 아니라, 확정된 requirements.md를 지니에게 전달하고 “이 요구사항을 기준으로 구현 방법을 검토해 달라”고 요청하는 것입니다.</p>
     </div>
     <div class="card">
-      <div class="label">CHECK 2 · 근거가 있나?</div>
-      <h3>계산 규칙도 검증해야 한다</h3>
-      <p>“좋아하는 교과목 점수 → 진로 분야 → 추천 직업”이라는 연결이 실제로 믿을 만한 진로 자료에 근거하는지 별도로 확인해야 합니다. 자세한 문장만으로 근거가 생기는 것은 아닙니다.</p>
+      <div class="label">GENI · 이해와 조사</div>
+      <h3>requirements.md를 읽고 Deep Research를 시작한다</h3>
+      <p>지니는 먼저 requirements.md를 읽어 무엇을 만들어야 하는지 이해한 뒤, 어떻게 구현하는 것이 좋은지 판단하기 위해 필요한 진로 자료, 사례, 기술 방법과 근거를 Deep Research로 수집합니다.</p>
     </div>
   </div>
 
-  <div class="callout">
-    <strong>학생에게 던질 세 가지 질문</strong><br><br>
-    ① 우리가 직접 결정하지 않은 내용이 들어가지는 않았나요?<br>
-    ② 계산과 추천에 실제로 믿을 만한 근거가 있나요?<br>
-    ③ 기능은 많아졌지만, 처음 내가 만들고 싶었던 App과 같은가요?
+  <div class="prompt-card">
+    <div class="step">지니에게 전달할 수 있는 예시 프롬프트</div>
+    <button class="copy-btn" onclick="copyText(this)">복사</button>
+    <div class="prompt-text">첨부한 requirements.md를 먼저 읽고 내가 무엇을 만들고 싶은지 정확히 이해해 주세요.
+
+아직 바로 Coding하지 마세요.
+요구사항을 충족하려면 어떤 방식으로 구현하는 것이 좋은지 판단할 수 있도록 필요한 자료와 근거를 Deep Research로 조사해 주세요.
+
+특히 진로 정보, 점수 계산 방식, 결과 설명에 필요한 근거와 참고 사례를 확인하고,
+조사 결과를 바탕으로 어떻게 구현할 것인지 BRIEF.md 초안을 작성해 주세요.</div>
   </div>
 
   <div class="final-msg">
-    <p>“AI에게 ‘마음대로 정하지 마’라고 해도 빈칸을 채우는 제안을 할 수 있다.<br>그래서 마지막 판단은 사람이 다시 해야 한다.”</p>
+    <p>“학생은 WHAT을 결정하고 requirements.md로 전달한다.<br>지니는 그 문서를 읽고 HOW를 찾기 위한 Research를 시작한다.”</p>
   </div>
 </section>
 
 <section class="section" id="research">
-  <div class="section-head"><span class="num">08</span><div><h2>그래서 Research와 검증이 필요하다</h2><p class="sub">RESEARCH → CROSS-CHECK → IMPLEMENT</p></div></div>
+  <div class="section-head"><span class="num">08</span><div><h2>Deep Research → BRIEF.md — “어떻게 구현할 것인가”를 확정한다</h2><p class="sub">RESEARCH → BRIEF → REVIEW LOOP → IMPLEMENT</p></div></div>
   <p class="intro">
-    이제 필요한 것은 더 긴 Prompt가 아니라 <strong>근거 확인</strong>입니다.
-    커리어넷, 고용24, O*NET 등 공식·신뢰 가능한 진로 자료를 조사하고,
-    한 AI가 찾은 내용을 다른 AI가 다시 확인한 뒤에야 구현에 사용할 기준을 정합니다.
+    지니는 requirements.md를 기준으로 Deep Research를 수행해 필요한 자료와 구현 아이디어를 수집합니다.
+    그 결과를 바탕으로 <strong>요구사항을 실제로 어떻게 구현할 것인지 설명한 BRIEF.md</strong>를 작성합니다.
+    이후 토비가 BRIEF.md를 읽고 학생의 요구사항을 빠짐없이 충족하는지 검토하며,
+    부족하거나 잘못 이해한 부분이 있으면 지니에게 피드백합니다.
+    지니는 BRIEF.md를 수정하고, 토비가 PASS할 때까지 이 검토·수정 Loop를 반복합니다.
   </p>
 
   <div class="pipeline">
-    <div class="pipe"><b>1차 requirements.md</b><span>대화로 구체화된 설계</span></div>
+    <div class="pipe"><b>requirements.md</b><span>학생이 정한 WHAT</span></div>
     <div class="arrow">→</div>
-    <div class="pipe"><b>Research</b><span>공식 진로 자료와 근거 조사</span></div>
+    <div class="pipe"><b>지니 Deep Research</b><span>근거·사례·구현 방법 조사</span></div>
     <div class="arrow">→</div>
-    <div class="pipe"><b>Cross-check</b><span>다른 AI가 출처와 논리 재확인</span></div>
+    <div class="pipe"><b>BRIEF.md</b><span>지니가 정리한 HOW</span></div>
+    <div class="arrow">↔</div>
+    <div class="pipe"><b>토비 검토 · 지니 수정</b><span>요구사항 충족까지 반복</span></div>
     <div class="arrow">→</div>
-    <div class="pipe"><b>구분</b><span>근거 있는 내용 / 구현 가정</span></div>
-    <div class="arrow">→</div>
-    <div class="pipe"><b>Agent 구현</b><span>검토된 기준으로 Coding</span></div>
+    <div class="pipe"><b>PASS 후 팀 구현</b><span>지니가 토디·애니와 협력해 Coding·Test</span></div>
   </div>
 
   <div class="callout">
-    <strong>이번 App A에서의 원칙:</strong><br>
-    Research는 Gemini가 만든 requirements.md의 핵심 구조를 마음대로 바꾸기 위한 것이 아닙니다.
-    문서에 비어 있는 진로 정보와 Mapping의 근거를 확인하고, 근거가 없으면 <strong>“구현을 위한 가정”이라고 솔직하게 표시</strong>하기 위한 단계입니다.
+    <strong>핵심 구분:</strong><br>
+    <strong>requirements.md = 무엇을 만들 것인가(WHAT)</strong><br>
+    <strong>BRIEF.md = 그 요구사항을 어떻게 구현할 것인가(HOW)</strong><br><br>
+    BRIEF.md가 확정되면 지니는 자신의 팀원들에게 역할을 나누어 구현을 진행합니다.
+    예를 들어 토디가 Coding을 맡고, 애니가 독립적으로 검토·Test하며, 지니는 전체 결과를 확인하고 필요한 수정 지시를 내립니다.
+  </div>
+
+  <div class="final-msg">
+    <p>“요구사항을 바로 Coding으로 넘기지 않는다.<br>Research로 HOW를 찾고 → BRIEF.md로 합의한 뒤 → 팀이 구현한다.”</p>
   </div>
 </section>
 
 <section class="section" id="edu">
-  <div class="section-head"><span class="num">09</span><div><h2>학생 교육용 핵심 포인트 — Vibe Coding 수업의 시사점</h2><p class="sub">EDUCATIONAL INSIGHTS</p></div></div>
+  <div class="section-head"><span class="num">09</span><div><h2>학생 교육용 핵심 포인트 — Vibe Coding의 역할 분담을 이해한다</h2><p class="sub">EDUCATIONAL INSIGHTS</p></div></div>
   <ul class="check">
-    <li><strong>프롬프트 길이보다 중요한 대화 제어:</strong> 무작정 긴 프롬프트를 주는 것보다, AI가 먼저 결정하지 못하도록 질의응답 규칙을 설계하는 것이 핵심입니다.</li>
-    <li><strong>학생 주도 기획(Intent Ownership):</strong> 질문에 답하는 동안 학생은 자신이 만들 Web App의 방향과 필요한 기능을 하나씩 결정합니다. 질문 횟수 자체가 목표는 아닙니다.</li>
-    <li><strong>AI의 결과도 다시 검토:</strong> AI가 만든 requirements.md에는 학생이 직접 정하지 않은 내용이나 근거가 부족한 내용이 들어갈 수 있으므로 사람이 다시 확인해야 합니다.</li>
-    <li><strong>Research 후 Agent 개발 연계:</strong> 필요한 근거를 조사하고 다른 AI의 Cross-check를 거친 뒤, 검토된 요구사항을 Google Antigravity IDE의 AI Agent에게 전달하여 구현합니다.</li>
+    <li><strong>학생은 의도 결정자:</strong> Gemini의 질문에 답하면서 무엇을 만들 것인지 스스로 결정하고, 필요한 경우 다시 대화해 요구사항을 확정합니다.</li>
+    <li><strong>Gemini는 요구사항 문서화:</strong> 학생이 구체화한 요구를 Agent가 이해할 수 있도록 <strong>requirements.md</strong>로 정리합니다.</li>
+    <li><strong>지니는 구현 방법을 설계:</strong> requirements.md를 읽고 Deep Research를 수행한 뒤, 어떻게 구현할지를 <strong>BRIEF.md</strong>로 작성합니다.</li>
+    <li><strong>토비와 지니는 검토·수정 Loop:</strong> BRIEF.md가 학생의 요구사항을 모두 충족하는지 확인하고, 부족하면 다시 수정해 PASS될 때까지 반복합니다.</li>
+    <li><strong>지니 팀이 구현과 Test 수행:</strong> BRIEF.md가 확정되면 지니가 토디·애니 등 팀원과 역할을 나누어 Coding·검토·Test를 수행하고, 학생은 실제 결과를 보고 최종 판단합니다.</li>
   </ul>
 
   <div class="final-msg">
-    <p>“좋은 Vibe Coding은 AI에게 한 번에 완벽한 답을 받는 것이 아니라,<br>내 생각을 구체화하고 → AI의 정리를 다시 검토하고 → 근거를 확인한 뒤 → Agent와 함께 구현하는 과정입니다.”</p>
+    <p>“좋은 Vibe Coding은 학생이 모든 기술을 아는 것이 아니라,<br>WHAT을 결정하고 → requirements.md로 전달하고 → Research와 BRIEF.md로 HOW를 검토한 뒤 → Agent 팀과 함께 구현하는 과정입니다.”</p>
   </div>
 </section>
 
