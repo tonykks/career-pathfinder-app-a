@@ -19,6 +19,7 @@ body{
   background:
     radial-gradient(900px 600px at 85% -10%,rgba(124,140,255,.12),transparent 60%),
     radial-gradient(800px 500px at 0 20%,rgba(68,208,189,.08),transparent 55%),var(--bg);
+  word-break:keep-all;
 }
 .layout{display:flex;max-width:1600px;margin:0 auto;align-items:flex-start}
 .side{
@@ -38,7 +39,7 @@ body{
 .hero{padding:72px 0 42px;border-bottom:1px solid var(--line2)}
 .kicker{font:12px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--accent2);margin:0 0 14px}
 h1{font-size:clamp(31px,5vw,48px);line-height:1.18;margin:0 0 16px;letter-spacing:-.035em}
-.lede{font-size:17px;color:var(--muted);max-width:82ch;margin:0}
+.lede{font-size:17px;color:var(--muted);max-width:100%;margin:0;text-wrap:pretty}
 .meta{display:flex;flex-wrap:wrap;gap:9px;margin-top:24px}
 .tag{font:11px var(--mono);color:var(--muted);padding:6px 11px;border:1px solid var(--line);border-radius:999px;background:rgba(17,27,40,.7)}
 .section{padding-top:64px;scroll-margin-top:24px}
@@ -47,7 +48,7 @@ h1{font-size:clamp(31px,5vw,48px);line-height:1.18;margin:0 0 16px;letter-spacin
 h2{font-size:clamp(23px,3.5vw,31px);line-height:1.3;margin:0;letter-spacing:-.02em}
 h3{font-size:17px;margin:0 0 8px}
 .sub{font:11px var(--mono);color:var(--dim);letter-spacing:.08em;margin:4px 0 0}
-.intro{color:var(--muted);font-size:15.5px;max-width:82ch;margin:14px 0 24px}
+.intro{color:var(--muted);font-size:15.5px;max-width:100%;margin:14px 0 24px;text-wrap:pretty}
 .callout{background:linear-gradient(135deg,rgba(124,140,255,.10),rgba(68,208,189,.06));border:1px solid rgba(124,140,255,.30);border-radius:var(--radius);padding:20px 22px;margin:22px 0}
 .warn{background:rgba(247,185,85,.07);border-color:rgba(247,185,85,.30)}
 .statement{font-size:clamp(20px,3vw,27px);line-height:1.55;font-weight:800;letter-spacing:-.02em;margin:0}
@@ -116,6 +117,21 @@ h3{font-size:17px;margin:0 0 8px}
 .who{font:700 10px var(--mono);letter-spacing:.1em;margin-bottom:5px;color:var(--dim)}
 .check{margin:14px 0 0;padding-left:20px;color:var(--muted)}
 .check li{margin:7px 0}
+h1,h2,h3,h4,h5,h6{text-wrap:balance}
+p,li,th,td,.statement,.final-msg p,.check li,.agent p,.bubble p{text-wrap:pretty}
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 18px 0;
+}
+.table-wrap table {
+  margin: 0;
+  width: 100%;
+}
+.table-wrap .min-w-table {
+  min-width: 580px;
+}
 .final-msg{margin-top:26px;padding:24px;border-radius:16px;border:1px solid rgba(68,208,189,.3);background:rgba(68,208,189,.07)}
 .final-msg p{font-size:20px;font-weight:800;margin:0;line-height:1.6}
 footer{margin-top:72px;padding-top:24px;border-top:1px solid var(--line2);color:var(--dim);font:11px var(--mono);text-align:center}
@@ -296,6 +312,7 @@ footer{margin-top:72px;padding-top:24px;border-top:1px solid var(--line2);color:
 @media(max-width:1180px){.side{display:none}.mobile-nav{display:flex}.wrap{padding:0 22px 90px}}
 @media(max-width:820px){.agent-grid{grid-template-columns:1fr 1fr}.loop{grid-template-columns:1fr}.loop .a{transform:rotate(90deg);text-align:center}}
 @media(max-width:720px){.cards,.agent-grid{grid-template-columns:1fr}.hero{padding-top:44px}.wrap{padding-left:15px;padding-right:15px}.arrow{display:none}.bubble{max-width:96%}}
+@media(max-width:480px){.pipe{flex:1 1 100%}}
 @media print{
  body{background:#fff;color:#111}.side,.mobile-nav{display:none!important}.wrap{max-width:none;padding:0 16mm 18mm}
  .hero{padding-top:10mm}.card,.callout,.pipe,.stagebox,.agent,.loop .box,.bubble,.final-msg{background:#fff!important;border-color:#bbb!important}
@@ -502,14 +519,16 @@ footer{margin-top:72px;padding-top:24px;border-top:1px solid var(--line2);color:
     <div class="pipe"><b>FAIL이면 반복</b><span>수정 지시 → 재구현 → 재검증</span></div>
   </div>
 
-  <table class="compare handoff-table">
-    <thead><tr><th>역할</th><th>남기는 기록</th><th>다음 작업자가 확인하는 것</th></tr></thead>
-    <tbody>
-      <tr><td><strong>지니</strong></td><td>작업 목적 · 수정 범위 · 완료조건 · 금지사항</td><td>토디와 애니가 무엇을 해야 하는지</td></tr>
-      <tr><td><strong>토디</strong></td><td>변경 파일 · Coding 내용 · Test 결과 · 남은 문제</td><td>지니가 실제 구현이 지시와 맞는지</td></tr>
-      <tr><td><strong>애니</strong></td><td>PASS/FAIL · 발견 오류 · 누락 요구사항 · Regression 결과</td><td>지니가 어떤 보완이 필요한지</td></tr>
-    </tbody>
-  </table>
+  <div class="table-wrap">
+    <table class="compare handoff-table min-w-table">
+      <thead><tr><th>역할</th><th>남기는 기록</th><th>다음 작업자가 확인하는 것</th></tr></thead>
+      <tbody>
+        <tr><td><strong>지니</strong></td><td>작업 목적 · 수정 범위 · 완료조건 · 금지사항</td><td>토디와 애니가 무엇을 해야 하는지</td></tr>
+        <tr><td><strong>토디</strong></td><td>변경 파일 · Coding 내용 · Test 결과 · 남은 문제</td><td>지니가 실제 구현이 지시와 맞는지</td></tr>
+        <tr><td><strong>애니</strong></td><td>PASS/FAIL · 발견 오류 · 누락 요구사항 · Regression 결과</td><td>지니가 어떤 보완이 필요한지</td></tr>
+      </tbody>
+    </table>
+  </div>
 </section>
 
 <section class="section" id="bridge">
@@ -566,16 +585,18 @@ footer{margin-top:72px;padding-top:24px;border-top:1px solid var(--line2);color:
 <section class="section" id="approval">
   <div class="section-head"><span class="num">06</span><div><h2>학생은 어디에서 개입할까? — 중요한 지점만 복사·붙여넣기로 연결한다</h2><p class="sub">HUMAN-IN-THE-LOOP CHECKPOINTS</p></div></div>
 
-  <table class="compare checkpoint-table">
-    <thead><tr><th>시점</th><th>학생이 하는 일</th><th>AI가 하는 일</th></tr></thead>
-    <tbody>
-      <tr><td><strong>① 요구사항</strong></td><td>토비와 대화하며 만들고 싶은 것을 확정한다.</td><td>토비가 requirements.md로 정리한다.</td></tr>
-      <tr><td><strong>② 구현 설계</strong></td><td>지니의 BRIEF.md를 토비에게 전달해 검토받고 피드백을 다시 지니에게 전달한다.</td><td>지니가 Research와 BRIEF를 수정해 HOW를 확정한다.</td></tr>
-      <tr><td><strong>③ 개발 중</strong></td><td>저수준 Coding 과정에는 매번 개입하지 않고 중요한 변경만 확인한다.</td><td>지니가 Terminal로 토디·애니를 호출해 구현·검토·Test를 반복한다.</td></tr>
-      <tr><td><strong>④ 완료 검토</strong></td><td>지니의 완료 보고를 토비에게 전달하고 피드백을 다시 지니에게 전달한다.</td><td>토비가 의도를 검토하고 지니가 필요한 수정을 반영한다.</td></tr>
-      <tr><td><strong>⑤ 최종 판단</strong></td><td>학생이 직접 실행해 “내가 원한 결과인가?”를 판단한다.</td><td>PASS된 결과를 배포할 준비를 한다.</td></tr>
-    </tbody>
-  </table>
+  <div class="table-wrap">
+    <table class="compare checkpoint-table min-w-table">
+      <thead><tr><th>시점</th><th>학생이 하는 일</th><th>AI가 하는 일</th></tr></thead>
+      <tbody>
+        <tr><td><strong>① 요구사항</strong></td><td>토비와 대화하며 만들고 싶은 것을 확정한다.</td><td>토비가 requirements.md로 정리한다.</td></tr>
+        <tr><td><strong>② 구현 설계</strong></td><td>지니의 BRIEF.md를 토비에게 전달해 검토받고 피드백을 다시 지니에게 전달한다.</td><td>지니가 Research와 BRIEF를 수정해 HOW를 확정한다.</td></tr>
+        <tr><td><strong>③ 개발 중</strong></td><td>저수준 Coding 과정에는 매번 개입하지 않고 중요한 변경만 확인한다.</td><td>지니가 Terminal로 토디·애니를 호출해 구현·검토·Test를 반복한다.</td></tr>
+        <tr><td><strong>④ 완료 검토</strong></td><td>지니의 완료 보고를 토비에게 전달하고 피드백을 다시 지니에게 전달한다.</td><td>토비가 의도를 검토하고 지니가 필요한 수정을 반영한다.</td></tr>
+        <tr><td><strong>⑤ 최종 판단</strong></td><td>학생이 직접 실행해 “내가 원한 결과인가?”를 판단한다.</td><td>PASS된 결과를 배포할 준비를 한다.</td></tr>
+      </tbody>
+    </table>
+  </div>
 
   <div class="callout">
     <strong>중요:</strong> 학생은 모든 Terminal 명령과 Code를 이해할 필요가 없습니다.
